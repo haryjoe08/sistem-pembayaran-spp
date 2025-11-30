@@ -160,33 +160,26 @@ class TagihanController extends Controller
     /**
      * Update tagihan.
      */
-    public function update(Request $request, Tagihan $tagihan)
+public function update(Request $request, $id)
 {
     $request->validate([
         'siswa_nis' => 'required|exists:siswa,nis',
         'jenis_pembayaran_id' => 'required|exists:jenis_pembayaran,id',
+        'jatuh_tempo' => 'required|date|after_or_equal:today', // TAMBAHKAN INI
     ]);
 
-    // Hapus validasi untuk sudah_dibayar dan status
-    // Karena tidak ada di form
-
-    $siswa = Siswa::find($request->siswa_nis);
-    if (!$siswa->kelas_id) {
-        return back()->withErrors(['siswa_nis' => 'Siswa belum di-assign ke kelas.']);
-    }
-
-    // Ambil nominal dari jenis pembayaran
-    $jenisPembayaran = JenisPembayaran::findOrFail($request->jenis_pembayaran_id);
-
+    $tagihan = Tagihan::findOrFail($id);
+    
     $tagihan->update([
         'siswa_nis' => $request->siswa_nis,
-        'kelas_id' => $siswa->kelas_id,
         'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
-        'total_tagihan' => $jenisPembayaran->nominal, // Auto update dari jenis pembayaran
-        // sudah_dibayar dan status tidak diubah
+        'jatuh_tempo' => $request->jatuh_tempo, // TAMBAHKAN INI
+        'total_tagihan' => JenisPembayaran::find($request->jenis_pembayaran_id)->nominal,
+        'kelas_id' => Siswa::where('nis', $request->siswa_nis)->first()->kelas_id,
     ]);
 
-    return redirect()->route('tagihan.index')->with('success', 'Tagihan berhasil diperbarui.');
+    return redirect()->route('tagihan.index')
+                     ->with('success', 'Tagihan berhasil diupdate!');
 }
 
     /**

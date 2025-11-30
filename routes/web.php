@@ -14,7 +14,7 @@ use App\Http\Controllers\TransaksiController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SiswaSideController;
-
+use App\Http\Controllers\PaymentController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -53,6 +53,9 @@ Route::middleware(['auth'])->group(function () {
 
 // ======================== CRUD MASTER DATA ========================
 Route::middleware(['auth'])->group(function () {
+    // Siswa
+    Route::resource('siswa', SiswaController::class);
+    
     // Tahun Ajaran
     Route::resource('tahun-ajaran', TahunAjaranController::class);
 
@@ -62,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
     // Jurusan
     Route::resource('jurusan', JurusanController::class);
 
-  
+
 
     // Jenis Pembayaran
     Route::resource('jenis-pembayaran', JenisPembayaranController::class);
@@ -103,13 +106,35 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export/tunggakan', [LaporanController::class, 'exportTunggakan'])->name('laporan.export.tunggakan');
         Route::get('/export/per-kelas', [LaporanController::class, 'exportPerKelas'])->name('laporan.export.per-kelas');
     });
-// Routes untuk Siswa
-Route::prefix('siswa')->middleware(['auth'])->group(function () {
-    Route::get('/tagihan', [SiswaSideController::class, 'tagihan'])->name('siswa.tagihan');
-    Route::get('/tagihan/semua-tagihan', [SiswaSideController::class, 'semuaTagihan'])->name('siswa.tagihan.semua-tagihan');
-    Route::get('/history', [SiswaSideController::class, 'historyPembayaran'])->name('siswa.history');
-    Route::get('/kwitansi/{transaksi}', [SiswaSideController::class, 'kwitansi'])->name('siswa.kwitansi');
-    Route::get('/profil', [SiswaSideController::class, 'profil'])->name('siswa.profil');
+    // Routes untuk Siswa Side
+    Route::prefix('siswa-side')->middleware(['auth'])->group(function () {
+        Route::get('/tagihan', [SiswaSideController::class, 'tagihan'])->name('siswa.tagihan');
+        Route::get('/tagihan/semua-tagihan', [SiswaSideController::class, 'semuaTagihan'])->name('siswa.tagihan.semua-tagihan');
+        Route::get('/history', [SiswaSideController::class, 'historyPembayaran'])->name('siswa.history');
+        Route::get('/kwitansi/{transaksi}', [SiswaSideController::class, 'kwitansi'])->name('siswa.kwitansi');
+        Route::get('/profil', [SiswaSideController::class, 'profil'])->name('siswa.profil');
+    });
 });
+
+
+
+// Payment Routes (Siswa & Admin)
+Route::prefix('payment')->middleware('auth')->group(function() {
+    Route::get('/tagihan/{tagihan}', [PaymentController::class, 'index'])->name('payment.index');
+    Route::post('/create/{tagihan}', [PaymentController::class, 'create'])->name('payment.create');
+    Route::get('/check-status/{orderId}', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
+    Route::get('/detail/{orderId}', [PaymentController::class, 'detail'])->name('payment.detail');
     
+    // Callback URLs
+    Route::get('/finish', [PaymentController::class, 'finish'])->name('payment.finish');
+    Route::get('/unfinish', [PaymentController::class, 'unfinish'])->name('payment.unfinish');
+    Route::get('/error', [PaymentController::class, 'error'])->name('payment.error');
 });
+
+// Webhook (public, no auth)
+Route::post('/payment/notification', [PaymentController::class, 'notification'])->name('payment.notification');
+
+// Payment History (Siswa only)
+Route::get('/siswa/payment-history', [PaymentController::class, 'history'])
+     ->middleware(['auth', 'role:siswa'])
+     ->name('siswa.payment.history');

@@ -225,8 +225,7 @@
         <h6 class="alert-heading mb-2">Informasi Pembayaran</h6>
         <ul class="mb-0 ps-3">
           <li>Untuk melakukan pembayaran, silakan hubungi bagian <strong>Tata Usaha</strong></li>
-          <li>Atau transfer ke rekening sekolah dan konfirmasi ke TU</li>
-          <li>Simpan bukti pembayaran sebagai arsip</li>
+          <li>Atau lakukan pembayaran online secara otamatis</li>
         </ul>
       </div>
     </div>

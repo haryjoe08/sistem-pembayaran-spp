@@ -20,6 +20,36 @@
             <p class="mb-0"><strong>Terakhir Update:</strong> {{ $tagihan->updated_at->format('d/m/Y H:i') }}</p>
           </div>
         </div>
+        <div class="col-md-6">
+          @if($tagihan->jatuh_tempo)
+            <div class="alert {{ $tagihan->isJatuhTempo() ? 'alert-danger' : ($tagihan->isMendekatJatuhTempo() ? 'alert-warning' : 'alert-success') }}">
+              <h6>
+                <i class="fas fa-calendar-alt"></i> Status Jatuh Tempo
+              </h6>
+              <p class="mb-1">
+                <strong>Tanggal:</strong> {{ $tagihan->jatuh_tempo->format('d/m/Y') }}
+              </p>
+              <p class="mb-0">
+                @if($tagihan->isJatuhTempo())
+                  <span class="badge bg-danger">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    Sudah Lewat {{ $tagihan->jatuh_tempo->diffForHumans() }}
+                  </span>
+                @elseif($tagihan->isMendekatJatuhTempo())
+                  <span class="badge bg-warning">
+                    <i class="fas fa-clock"></i> 
+                    {{ $tagihan->jatuh_tempo->diffForHumans() }}
+                  </span>
+                @else
+                  <span class="badge bg-success">
+                    <i class="fas fa-check-circle"></i> 
+                    {{ $tagihan->jatuh_tempo->diffForHumans() }}
+                  </span>
+                @endif
+              </p>
+            </div>
+          @endif
+        </div>
       </div>
 
       <div class="row">
@@ -60,6 +90,27 @@
             @error('jenis_pembayaran_id')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
+          </div>
+
+          <!-- JATUH TEMPO (EDITABLE) -->
+          <div class="mb-3">
+            <label for="jatuh_tempo" class="form-label">
+              Jatuh Tempo <span class="text-danger">*</span>
+            </label>
+            <input type="date" 
+              class="form-control @error('jatuh_tempo') is-invalid @enderror" 
+              id="jatuh_tempo" 
+              name="jatuh_tempo"
+              value="{{ old('jatuh_tempo') ?? ($tagihan->jatuh_tempo ? $tagihan->jatuh_tempo->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')) }}"
+              min="{{ now()->format('Y-m-d') }}"
+              required>
+            @error('jatuh_tempo')
+              <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+            <div class="form-text">
+              <i class="fas fa-info-circle"></i> 
+              Pilih tanggal jatuh tempo pembayaran
+            </div>
           </div>
 
           <!-- TOTAL TAGIHAN (READ ONLY) -->
@@ -114,13 +165,36 @@
             </div>
             <div class="form-text">Status otomatis berubah saat pembayaran dilakukan</div>
           </div>
+
+          <!-- QUICK ACTIONS untuk Jatuh Tempo -->
+          <div class="mb-3">
+            <label class="form-label">Atur Jatuh Tempo Cepat</label>
+            <div class="btn-group d-flex" role="group">
+              <button type="button" class="btn btn-outline-primary btn-sm" onclick="setJatuhTempo(7)">
+                +7 Hari
+              </button>
+              <button type="button" class="btn btn-outline-primary btn-sm" onclick="setJatuhTempo(14)">
+                +14 Hari
+              </button>
+              <button type="button" class="btn btn-outline-primary btn-sm" onclick="setJatuhTempo(30)">
+                +30 Hari
+              </button>
+              <button type="button" class="btn btn-outline-primary btn-sm" onclick="setJatuhTempo(60)">
+                +60 Hari
+              </button>
+            </div>
+            <div class="form-text">
+              <i class="fas fa-lightbulb"></i> 
+              Klik untuk mengatur jatuh tempo dari hari ini
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- WARNING -->
       <div class="alert alert-info" role="alert">
         <i class="fas fa-info-circle"></i> 
-        <strong>Informasi:</strong> Form ini hanya untuk mengubah jenis pembayaran tagihan. Untuk mencatat pembayaran dari siswa, gunakan menu "Terima Pembayaran".
+        <strong>Informasi:</strong> Form ini untuk mengubah jenis pembayaran dan jatuh tempo tagihan. Untuk mencatat pembayaran dari siswa, gunakan menu "Terima Pembayaran".
       </div>
     </div>
 
@@ -154,18 +228,6 @@
     const sisa = total - sudahBayar;
     
     document.getElementById('sisa_tagihan').value = sisa.toLocaleString('id-ID');
-    
-    // Update status preview
-    const statusPreview = document.getElementById('status_preview');
-    if (sisa <= 0 && total > 0) {
-      statusPreview.textContent = 'Lunas';
-      statusPreview.className = 'badge bg-success';
-      document.getElementById('status').value = 'lunas';
-    } else {
-      statusPreview.textContent = 'Belum Lunas';
-      statusPreview.className = 'badge bg-warning';
-      document.getElementById('status').value = 'belum lunas';
-    }
   }
 
   // Event listeners
@@ -186,14 +248,52 @@
     }
   });
 
+  // Set Jatuh Tempo Quick Action
+  function setJatuhTempo(days) {
+    const today = new Date();
+    today.setDate(today.getDate() + days);
+    
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    
+    document.getElementById('jatuh_tempo').value = `${year}-${month}-${day}`;
+    
+    // Visual feedback
+    const input = document.getElementById('jatuh_tempo');
+    input.classList.add('border-success');
+    setTimeout(() => {
+      input.classList.remove('border-success');
+    }, 500);
+  }
+
+  // Validasi jatuh tempo (warning jika sudah lewat)
+  document.getElementById('jatuh_tempo').addEventListener('change', function() {
+    const selectedDate = new Date(this.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      if (!confirm('Tanggal jatuh tempo yang dipilih sudah lewat. Yakin ingin melanjutkan?')) {
+        this.value = today.toISOString().split('T')[0];
+      }
+    }
+  });
+
   // Konfirmasi submit
   document.querySelector('form').addEventListener('submit', function(e) {
     const siswaSelect = document.getElementById('siswa_nis');
     const siswaText = siswaSelect.options[siswaSelect.selectedIndex].text;
     const jenisSelect = document.getElementById('jenis_pembayaran_id');
     const jenisText = jenisSelect.options[jenisSelect.selectedIndex].text;
+    const jatuhTempo = document.getElementById('jatuh_tempo').value;
     
-    if (!confirm(`Yakin ingin memperbarui tagihan untuk:\n${siswaText}\n${jenisText}?`)) {
+    const message = `Yakin ingin memperbarui tagihan?\n\n` +
+                   `Siswa: ${siswaText}\n` +
+                   `Jenis: ${jenisText}\n` +
+                   `Jatuh Tempo: ${new Date(jatuhTempo).toLocaleDateString('id-ID')}`;
+    
+    if (!confirm(message)) {
       e.preventDefault();
     }
   });
@@ -201,4 +301,18 @@
   // Initial calculation
   calculateSisa();
 </script>
+
+<style>
+  /* Smooth border transition for date input */
+  #jatuh_tempo.border-success {
+    border-color: #28a745 !important;
+    transition: border-color 0.3s ease;
+  }
+
+  /* Button hover effect */
+  .btn-group button:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s;
+  }
+</style>
 @endsection

@@ -2,7 +2,7 @@
 
 @section('content')
 <h1 class="mx-5">
-  Sealamat Datang Staff TU yang Terhormat
+  Sealamat Datang 
 </h1>
 
 <div class="mx-5">

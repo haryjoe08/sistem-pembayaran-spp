@@ -57,9 +57,14 @@ class Tagihan extends Model
     // Helper method untuk cek mendekati jatuh tempo (7 hari)
     public function isMendekatJatuhTempo()
     {
-        return $this->jatuh_tempo 
-               && $this->jatuh_tempo <= now()->addDays(7) 
-               && $this->jatuh_tempo > now()
-               && $this->status != 'lunas';
+        return $this->jatuh_tempo
+            && $this->jatuh_tempo <= now()->addDays(7)
+            && $this->jatuh_tempo > now()
+            && $this->status != 'lunas';
+    }
+    // Di Model Tagihan
+    public function paymentOrders()
+    {
+        return $this->hasMany(PaymentOrder::class);
     }
 }

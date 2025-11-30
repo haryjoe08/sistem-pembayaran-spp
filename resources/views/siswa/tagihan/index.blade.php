@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid p-4">
-  
+
   <!-- Header -->
   <div class="row mb-4">
     <div class="col-12">
@@ -144,106 +144,109 @@
           </thead>
           <tbody>
             @forelse($tagihans as $t)
-              @php
-                $sisa = $t->total_tagihan - $t->sudah_dibayar;
-                $progress = $t->total_tagihan > 0 ? ($t->sudah_dibayar / $t->total_tagihan * 100) : 0;
-              @endphp
-              <tr>
-                <td class="px-4 py-3">
-                  {{ ($tagihans->currentPage() - 1) * $tagihans->perPage() + $loop->iteration }}
-                </td>
-                <td class="py-3">
-                  <div class="d-flex align-items-center">
-                    <i class="bi bi-receipt text-primary me-2"></i>
-                    <span class="fw-semibold">{{ $t->jenisPembayaran->nama }}</span>
-                  </div>
-                </td>
-                <td class="py-3">Rp {{ number_format($t->total_tagihan, 0, ',', '.') }}</td>
-                <td class="py-3 text-success">Rp {{ number_format($t->sudah_dibayar, 0, ',', '.') }}</td>
-                <td class="py-3">
-                  <span class="fw-bold text-danger">Rp {{ number_format($sisa, 0, ',', '.') }}</span>
-                </td>
-                <td class="py-3">
-                  @if($t->jatuh_tempo)
-                    <div class="d-flex flex-column">
-                      <span class="{{ $t->isJatuhTempo() ? 'text-danger fw-bold' : ($t->isMendekatJatuhTempo() ? 'text-warning fw-bold' : '') }}">
-                        {{ $t->jatuh_tempo->format('d/m/Y') }}
-                      </span>
-                      @if($t->isJatuhTempo())
-                        <small class="badge bg-danger">Sudah Lewat</small>
-                      @elseif($t->isMendekatJatuhTempo())
-                        <small class="badge bg-warning">{{ $t->jatuh_tempo->diffForHumans() }}</small>
-                      @endif
-                    </div>
-                  @else
-                    <span class="text-muted">-</span>
-                  @endif
-                </td>
-                <td class="py-3">
-                  <span class="badge {{ $t->status == 'lunas' ? 'bg-success' : 'bg-warning' }} px-3 py-2">
-                    <i class="bi bi-{{ $t->status == 'lunas' ? 'check-circle' : 'clock' }} me-1"></i>
-                    {{ ucfirst($t->status) }}
+            @php
+            $sisa = $t->total_tagihan - $t->sudah_dibayar;
+            $progress = $t->total_tagihan > 0 ? ($t->sudah_dibayar / $t->total_tagihan * 100) : 0;
+            @endphp
+            <tr>
+              <td class="px-4 py-3">
+                {{ ($tagihans->currentPage() - 1) * $tagihans->perPage() + $loop->iteration }}
+              </td>
+              <td class="py-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-receipt text-primary me-2"></i>
+                  <span class="fw-semibold">{{ $t->jenisPembayaran->nama }}</span>
+                </div>
+              </td>
+              <td class="py-3">Rp {{ number_format($t->total_tagihan, 0, ',', '.') }}</td>
+              <td class="py-3 text-success">Rp {{ number_format($t->sudah_dibayar, 0, ',', '.') }}</td>
+              <td class="py-3">
+                <span class="fw-bold text-danger">Rp {{ number_format($sisa, 0, ',', '.') }}</span>
+              </td>
+              <td class="py-3">
+                @if($t->jatuh_tempo)
+                <div class="d-flex flex-column">
+                  <span class="{{ $t->isJatuhTempo() ? 'text-danger fw-bold' : ($t->isMendekatJatuhTempo() ? 'text-warning fw-bold' : '') }}">
+                    {{ $t->jatuh_tempo->format('d/m/Y') }}
                   </span>
-                </td>
-                <td class="py-3">
-                  <div class="progress" style="height: 25px; min-width: 120px;">
-                    <div class="progress-bar {{ $t->status == 'lunas' ? 'bg-success' : 'bg-primary' }}" 
-                         style="width: {{ $progress }}%"
-                         role="progressbar">
-                      {{ number_format($progress, 0) }}%
-                    </div>
+                  @if($t->isJatuhTempo())
+                  <small class="badge bg-danger">Sudah Lewat</small>
+                  @elseif($t->isMendekatJatuhTempo())
+                  <small class="badge bg-warning">{{ $t->jatuh_tempo->diffForHumans() }}</small>
+                  @endif
+                </div>
+                @else
+                <span class="text-muted">-</span>
+                @endif
+              </td>
+              <td class="py-3">
+                <span class="badge {{ $t->status == 'lunas' ? 'bg-success' : 'bg-warning' }} px-3 py-2">
+                  <i class="bi bi-{{ $t->status == 'lunas' ? 'check-circle' : 'clock' }} me-1"></i>
+                  {{ ucfirst($t->status) }}
+                </span>
+              </td>
+              <td class="py-3">
+                <div class="progress" style="height: 25px; min-width: 120px;">
+                  <div class="progress-bar {{ $t->status == 'lunas' ? 'bg-success' : 'bg-primary' }}"
+                    style="width: {{ $progress }}%"
+                    role="progressbar">
+                    {{ number_format($progress, 0) }}%
                   </div>
-                </td>
-                <td class="py-3">
-                  <button class="btn btn-success">
-                    <i class="fas fa-cash"></i> Bayar
-                  </button>
-                </td>
-              </tr>
+                </div>
+              </td>
+              <td class="py-3">
+                <!-- Di siswa/tagihan/belum-lunas.blade.php -->
+                <a href="{{ route('payment.index', $t->id) }}"
+                  class="btn btn-primary">
+                  <i class="bi bi-credit-card me-1"></i>
+                  Bayar Online
+                </a>
+              </td>
+            </tr>
             @empty
-              <tr>
-                <td colspan="8" class="text-center py-5">
-                  <i class="bi bi-inbox display-6 text-muted"></i>
-                  <p class="text-muted mb-0 mt-2">Tidak ada tagihan</p>
-                </td>
-              </tr>
+            <tr>
+              <td colspan="8" class="text-center py-5">
+                <i class="bi bi-inbox display-6 text-muted"></i>
+                <p class="text-muted mb-0 mt-2">Tidak ada tagihan</p>
+              </td>
+            </tr>
             @endforelse
           </tbody>
         </table>
       </div>
     </div>
     @if($tagihans->hasPages())
-      <div class="card-footer bg-white border-top">
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="text-muted">
-            Menampilkan {{ $tagihans->firstItem() }} - {{ $tagihans->lastItem() }} dari {{ $tagihans->total() }} tagihan
-          </div>
-          <div>
-            {{ $tagihans->links() }}
-          </div>
+    <div class="card-footer bg-white border-top">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="text-muted">
+          Menampilkan {{ $tagihans->firstItem() }} - {{ $tagihans->lastItem() }} dari {{ $tagihans->total() }} tagihan
+        </div>
+        <div>
+          {{ $tagihans->links() }}
         </div>
       </div>
+    </div>
     @endif
   </div>
 
 </div>
 
 <style>
-.progress {
-  border-radius: 10px;
-  overflow: hidden;
-}
+  .progress {
+    border-radius: 10px;
+    overflow: hidden;
+  }
 
-.progress-bar {
-  font-weight: 600;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .progress-bar {
+    font-weight: 600;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.table-hover tbody tr:hover {
-  background-color: rgba(13, 110, 253, 0.05);
-}
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
 </style>
 @endsection

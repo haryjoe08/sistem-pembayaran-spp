@@ -12,9 +12,18 @@ use Illuminate\Support\Facades\Hash;
 
 class SiswaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $siswas = Siswa::with(['login', 'kelas', 'jurusan', 'tahunAjaran'])->paginate(10);
+        $query = Siswa::with(['kelas', 'jurusan', 'tahunAjaran']);
+
+        // Filter berdasarkan kelas jika ada parameter
+        if ($request->has('kelas') && $request->kelas != '') {
+            $query->whereHas('kelas', function ($q) use ($request) {
+                $q->where('kelas', $request->kelas);
+            });
+        }
+
+        $siswas = $query->paginate(10);
         return view('admin.master_data.siswa.index', compact('siswas'));
     }
 
