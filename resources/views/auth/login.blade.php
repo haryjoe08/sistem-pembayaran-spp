@@ -12,7 +12,7 @@
     <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
         <div class="text-center mb-4">
             <h4 class="fw-bold text-primary">Sistem Pembayaran SPP</h4>
-            <p class="text-muted">Madrasah Aliyah</p>
+            <p class="text-muted">Madrasah Aliyah NU BATANG</p>
         </div>
 
         <!-- Error Handling -->

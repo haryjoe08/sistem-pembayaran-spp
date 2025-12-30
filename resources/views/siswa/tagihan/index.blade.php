@@ -132,7 +132,7 @@
           <thead class="bg-light">
             <tr>
               <th class="px-4 py-3">No</th>
-              <th class="py-3">Jenis Pembayaran</th>
+              <th class="py-3">Jenis Tagihan</th>
               <th class="py-3">Total Tagihan</th>
               <th class="py-3">Sudah Dibayar</th>
               <th class="py-3">Sisa</th>
@@ -155,7 +155,7 @@
               <td class="py-3">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-receipt text-primary me-2"></i>
-                  <span class="fw-semibold">{{ $t->jenisPembayaran->nama }}</span>
+                  <span class="fw-semibold">{{ $t->jenisTagihan->nama }}</span>
                 </div>
               </td>
               <td class="py-3">Rp {{ number_format($t->total_tagihan, 0, ',', '.') }}</td>
@@ -195,11 +195,8 @@
                 </div>
               </td>
               <td class="py-3">
-                <!-- Di siswa/tagihan/belum-lunas.blade.php -->
-                <a href="{{ route('payment.index', $t->id) }}"
-                  class="btn btn-primary">
-                  <i class="bi bi-credit-card me-1"></i>
-                  Bayar Online
+                <a href="{{ route('payment.index', $t->id) }}" class="btn btn-sm btn-primary">
+                  <i class="fas fa-credit-card me-1"></i>Bayar
                 </a>
               </td>
             </tr>

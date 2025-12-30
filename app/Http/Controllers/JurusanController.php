@@ -9,48 +9,81 @@ class JurusanController extends Controller
 {
     public function index()
     {
-        $jurusans = Jurusan::all();
+        $jurusans = Jurusan::orderBy('id')->get();
         return view('admin.master_data.jurusan.create', compact('jurusans'));
     }
 
-    public function create()
-    {
-        return view('jurusan.create');
-    }
-
+    // =====================
+    // STORE
+    // =====================
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string|max:100|unique:jurusan,nama',
-            'kode' => 'nullable|string|max:10|unique:jurusan,kode',
+            'nama' => 'required|string|max:100',
+            'deskripsi' => 'nullable|string|max:255',
         ]);
 
-        Jurusan::create($request->all());
+        Jurusan::create([
+            'nama' => $request->nama,
+            'deskripsi' => $request->deskripsi,
+            'status' => 'aktif', // default aktif
+        ]);
 
-        return redirect()->route('jurusan.index')->with('success', 'Jurusan berhasil ditambahkan.');
+        return redirect()->route('jurusan.index')
+            ->with('success', 'Jurusan berhasil ditambahkan.');
     }
 
-    public function edit(Jurusan $jurusan)
+    // =====================
+    // EDIT
+    // =====================
+    public function edit($id)
     {
+        $jurusan = Jurusan::findOrFail($id);
         return view('admin.master_data.jurusan.edit', compact('jurusan'));
     }
 
-    public function update(Request $request, Jurusan $jurusan)
+    // =====================
+    // UPDATE
+    // =====================
+    public function update(Request $request, $id)
     {
+        $jurusan = Jurusan::findOrFail($id);
+
         $request->validate([
-            'nama' => 'required|string|max:100|unique:jurusan,nama,' . $jurusan->id,
-            'kode' => 'nullable|string|max:10|unique:jurusan,kode,' . $jurusan->id,
+            'nama' => 'required|string|max:100',
+            'deskripsi' => 'nullable|string|max:255',
         ]);
 
-        $jurusan->update($request->all());
+        $jurusan->update([
+            'nama' => $request->nama,
+            'deskripsi' => $request->deskripsi,
+        ]);
 
-        return redirect()->route('jurusan.index')->with('success', 'Jurusan berhasil diperbarui.');
+        return redirect()->route('jurusan.index')
+            ->with('success', 'Jurusan berhasil diperbarui.');
     }
 
-    public function destroy(Jurusan $jurusan)
+    // =====================
+    // NONAKTIF
+    // =====================
+    public function nonaktif($id)
     {
-        $jurusan->delete();
+        $jurusan = Jurusan::findOrFail($id);
+        $jurusan->update(['status' => 'nonaktif']);
 
-        return redirect()->route('jurusan.index')->with('success', 'Jurusan berhasil dihapus.');
+        return redirect()->route('jurusan.index')
+            ->with('success', 'Jurusan berhasil dinonaktifkan.');
+    }
+
+    // =====================
+    // AKTIFKAN
+    // =====================
+    public function aktifkan($id)
+    {
+        $jurusan = Jurusan::findOrFail($id);
+        $jurusan->update(['status' => 'aktif']);
+
+        return redirect()->route('jurusan.index')
+            ->with('success', 'Jurusan berhasil diaktifkan kembali.');
     }
 }

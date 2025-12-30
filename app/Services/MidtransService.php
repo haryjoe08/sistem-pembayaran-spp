@@ -45,7 +45,7 @@ class MidtransService
                         'id' => $tagihan->id,
                         'price' => (int) $amount,
                         'quantity' => 1,
-                        'name' => $tagihan->jenisPembayaran->nama,
+                        'name' => $tagihan->jenisTagihan->nama,
                         'category' => 'SPP',
                     ],
                 ],

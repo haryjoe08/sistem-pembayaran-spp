@@ -1,3 +1,4 @@
+{{-- resources/views/admin/laporan/pembayaran.blade.php --}}
 @extends('layouts.adminMaster')
 
 @section('content')
@@ -21,9 +22,6 @@
           <a href="{{ route('laporan.export.pembayaran', request()->all()) }}" class="btn btn-success">
             <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
           </a>
-          <button class="btn btn-primary" onclick="window.print()">
-            <i class="bi bi-printer me-1"></i> Print
-          </button>
         </div>
       </div>
     </div>
@@ -96,11 +94,11 @@
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label">Jenis Pembayaran</label>
-            <select class="form-select" name="jenis_pembayaran_id">
+            <label class="form-label">Jenis Tagihan</label>
+            <select class="form-select" name="jenis_tagihan_id">
               <option value="">Semua Jenis</option>
               @foreach($jenisPembayaranList as $jp)
-              <option value="{{ $jp->id }}" {{ request('jenis_pembayaran_id') == $jp->id ? 'selected' : '' }}>{{ $jp->nama }}</option>
+              <option value="{{ $jp->id }}" {{ request('jenis_tagihan_id') == $jp->id ? 'selected' : '' }}>{{ $jp->nama }}</option>
               @endforeach
             </select>
           </div>
@@ -132,7 +130,7 @@
     <div class="card-header bg-white border-bottom">
       <h6 class="mb-0 fw-semibold">
         <i class="bi bi-list-check me-2"></i>
-        Data Transaksi ({{ $transaksi->count() }} transaksi)
+        Data Transaksi ({{ $totalTransaksi }} transaksi)
       </h6>
     </div>
     <div class="card-body p-0">
@@ -145,7 +143,7 @@
               <th class="py-3">NIS</th>
               <th class="py-3">Nama Siswa</th>
               <th class="py-3">Kelas</th>
-              <th class="py-3">Jenis Pembayaran</th>
+              <th class="py-3">Jenis Tagihan</th>
               <th class="py-3 text-end">Jumlah</th>
               <th class="py-3">Metode</th>
             </tr>
@@ -153,12 +151,12 @@
           <tbody>
             @forelse($transaksi as $index => $t)
             <tr>
-              <td class="px-4 py-3">{{ $loop->iteration }}</td>
+              <td class="px-4 py-3">{{ $transaksi->firstItem() + $index }}</td>
               <td class="py-3">{{ $t->tanggal->format('d/m/Y H:i') }}</td>
               <td class="py-3">{{ $t->siswa_nis }}</td>
               <td class="py-3">{{ $t->siswa->nama }}</td>
               <td class="py-3">{{ $t->siswa->kelas->kelas ?? '-' }}</td>
-              <td class="py-3">{{ $t->tagihan->jenisPembayaran->nama ?? '-' }}</td>
+              <td class="py-3">{{ $t->tagihan->jenisTagihan->nama ?? '-' }}</td>
               <td class="py-3 text-end fw-bold text-success">Rp {{ number_format($t->jumlah_bayar, 0, ',', '.') }}</td>
               <td class="py-3">
                 @php
@@ -188,19 +186,29 @@
         </table>
       </div>
     </div>
+    
+    {{-- Pagination --}}
+    @if($transaksi->hasPages())
+    <div class="card-footer bg-white border-top">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="text-muted small">
+          Menampilkan {{ $transaksi->firstItem() }} sampai {{ $transaksi->lastItem() }} dari {{ $transaksi->total() }} transaksi
+        </div>
+        <div>
+          {{ $transaksi->links() }}
+        </div>
+      </div>
+    </div>
+    @endif
   </div>
 
 </div>
 
 <style>
   @media print {
-
-    .btn,
-    .card-header,
-    nav {
+    .btn, .card-header, nav {
       display: none !important;
     }
-
     .card {
       box-shadow: none !important;
       border: 1px solid #ddd !important;

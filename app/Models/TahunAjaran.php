@@ -13,6 +13,7 @@ class TahunAjaran extends Model
 
     protected $fillable = [
         'tahun',
+        'status',
     ];
 
     public function siswa()

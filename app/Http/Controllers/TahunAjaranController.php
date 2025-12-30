@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TahunAjaranController extends Controller
 {
@@ -25,10 +26,11 @@ class TahunAjaranController extends Controller
         // create via Eloquent (memerlukan $fillable di model)
         TahunAjaran::create([
             'tahun' => $request->tahun,
+            'status' => 'nonaktif',
         ]);
 
         return redirect()->route('tahun-ajaran.index')
-                         ->with('success', 'Tahun Ajaran berhasil ditambahkan.');
+            ->with('success', 'Tahun Ajaran berhasil ditambahkan.');
     }
 
     public function edit(TahunAjaran $tahunAjaran)
@@ -47,13 +49,28 @@ class TahunAjaranController extends Controller
         ]);
 
         return redirect()->route('tahun-ajaran.index')
-                         ->with('success', 'Tahun Ajaran berhasil diperbarui.');
+            ->with('success', 'Tahun Ajaran berhasil diperbarui.');
+    }
+    public function activate(TahunAjaran $tahunAjaran)
+    {
+        DB::transaction(function () use ($tahunAjaran) {
+
+            // nonaktifkan semua tahun ajaran
+            TahunAjaran::where('status', 'aktif')
+                ->update(['status' => 'nonaktif']);
+
+            // aktifkan yang dipilih
+            $tahunAjaran->update(['status' => 'aktif']);
+        });
+
+        return redirect()->route('tahun-ajaran.index')
+            ->with('success', 'Tahun ajaran berhasil diaktifkan.');
     }
 
     public function destroy(TahunAjaran $tahunAjaran)
     {
         $tahunAjaran->delete();
         return redirect()->route('tahun-ajaran.index')
-                         ->with('success', 'Tahun Ajaran berhasil dihapus.');
+            ->with('success', 'Tahun Ajaran berhasil dihapus.');
     }
 }

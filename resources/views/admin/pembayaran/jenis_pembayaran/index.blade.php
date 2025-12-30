@@ -8,8 +8,8 @@
 </style>
 <div class="card mb-4 mx-5 mt-4">
   <div class="card-header">
-    <h2>Jenis Pembayaran</h2>
-    <a href="{{ route('jenis-pembayaran.create') }}" class="btn btn-primary mt-3">Tambah Jenis Pembayran</a>
+    <h2>Jenis Tagihan</h2>
+    <a href="{{ route('jenis-pembayaran.create') }}" class="btn btn-primary mt-3">Tambah Jenis Tagihan</a>
   </div>
 
   <div class="card-body">
@@ -17,44 +17,70 @@
       <thead>
         <tr>
           <th style="width: 10px">No</th>
-          <th>Jenis Pembayaran</th>
-          <th>Nominal</th>
-          <th>Deskripsi</th>
+          <th>Jenis Tagihan</th>
+          <th>Tipe</th>
+          <th>Status</th>
+          <th style="width: 220px">Aksi</th>
         </tr>
       </thead>
       <tbody>
         @forelse($data as $d)
         <tr class="align-middle">
-          <td>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}.</td>
+          <td>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}</td>
+
           <td>{{ $d->nama }}</td>
-          <td>Rp {{ number_format($d->nominal, 0, ',', '.') }}</td>
-          <td>{{ $d->deskripsi }}</td>
+          <td>{{ $d->tipe }}</td>
+
+          {{-- STATUS --}}
           <td>
-            <!-- Tombol Edit -->
+            @if($d->status === 'aktif')
+            <span class="badge bg-success">Aktif</span>
+            @else
+            <span class="badge bg-secondary">Nonaktif</span>
+            @endif
+          </td>
+
+          {{-- AKSI --}}
+          <td>
+            {{-- Aktif / Nonaktif --}}
+            @if($d->status === 'aktif')
+            <form action="{{ route('jenis-pembayaran.nonaktifkan', $d->id) }}"
+              method="POST"
+              class="d-inline"
+              onsubmit="return confirm('Nonaktifkan Jenis Tagihan ini?')">
+              @csrf
+              @method('PATCH')
+              <button class="btn btn-sm btn-secondary">
+                Nonaktifkan
+              </button>
+            </form>
+            @else
+            <form action="{{ route('jenis-pembayaran.aktifkan', $d->id) }}"
+              method="POST"
+              class="d-inline">
+              @csrf
+              @method('PATCH')
+              <button class="btn btn-sm btn-success">
+                Aktifkan
+              </button>
+            </form>
+            @endif
+
+            {{-- Edit --}}
             <a href="{{ route('jenis-pembayaran.edit', $d->id) }}"
               class="btn btn-sm btn-warning">
               Edit
             </a>
 
-            <!-- Tombol Hapus -->
-            <form action="{{ route('jenis-pembayaran.destroy', $d->id) }}"
-              method="POST"
-              class="d-inline"
-              onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="btn btn-sm btn-danger">
-                Hapus
-              </button>
-            </form>
           </td>
         </tr>
         @empty
         <tr>
-          <td colspan="12" class="text-center">Data tidak tersedia.</td>
+          <td colspan="4" class="text-center">Data tidak tersedia.</td>
         </tr>
         @endforelse
       </tbody>
+
 
     </table>
 

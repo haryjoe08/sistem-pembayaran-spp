@@ -99,10 +99,10 @@
         <div class="card-body p-4">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="text-muted mb-1">Jenis Pembayaran</label>
+              <label class="text-muted mb-1">Jenis Tagihan</label>
               <div class="d-flex align-items-center">
                 <i class="bi bi-receipt text-primary me-2 fs-5"></i>
-                <span class="fw-semibold">{{ $transaksi->tagihan->jenisPembayaran->nama ?? '-' }}</span>
+                <span class="fw-semibold">{{ $transaksi->tagihan->jenisTagihan->nama ?? '-' }}</span>
               </div>
             </div>
             <div class="col-md-6 mb-3">

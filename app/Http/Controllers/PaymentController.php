@@ -24,7 +24,7 @@ class PaymentController extends Controller
      */
     public function index($tagihanId)
     {
-        $tagihan = Tagihan::with(['siswa', 'jenisPembayaran'])->findOrFail($tagihanId);
+        $tagihan = Tagihan::with(['siswa', 'jenisTagihan'])->findOrFail($tagihanId);
         
         // Check authorization (siswa hanya bisa bayar tagihan sendiri)
         if (Auth::user()->role == 'siswa') {
@@ -183,7 +183,7 @@ class PaymentController extends Controller
         $siswa = Auth::user()->siswa;
         
         $payments = PaymentOrder::where('siswa_nis', $siswa->nis)
-                                ->with(['tagihan.jenisPembayaran'])
+                                ->with(['tagihan.jenisTagihan'])
                                 ->orderBy('created_at', 'desc')
                                 ->paginate(10);
 
@@ -195,7 +195,7 @@ class PaymentController extends Controller
      */
     public function detail($orderId)
     {
-        $paymentOrder = PaymentOrder::with(['tagihan.jenisPembayaran', 'siswa'])
+        $paymentOrder = PaymentOrder::with(['tagihan.jenisTagihan', 'siswa'])
                                     ->where('order_id', $orderId)
                                     ->firstOrFail();
 

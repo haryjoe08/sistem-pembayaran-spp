@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mt-4">
-    <h3 class="mb-4">Edit Tahun Ajaran</h3>
+    <h3 class="mb-4">Edit Jurusan</h3>
 
     {{-- Notifikasi --}}
     @if ($errors->any())

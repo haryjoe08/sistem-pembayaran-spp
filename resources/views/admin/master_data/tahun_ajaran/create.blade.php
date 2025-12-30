@@ -6,7 +6,7 @@
 
     {{-- Notifikasi --}}
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
     {{-- Form Tambah Tahun Ajaran --}}
@@ -34,28 +34,46 @@
                     <tr>
                         <th>No</th>
                         <th>Tahun Ajaran</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($tahunAjarans as $index => $ta)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $ta->tahun }}</td>
-                            <td>
-                                <a href="{{ route('tahun-ajaran.edit', $ta->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <form action="{{ route('tahun-ajaran.destroy', $ta->id) }}" method="POST" class="d-inline"
-                                      onsubmit="return confirm('Yakin hapus tahun ajaran ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger" type="submit">Hapus</button>
-                                </form>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $ta->tahun }}</td>
+                        <td>
+                            @if($ta->status === 'aktif')
+                            <span class="badge bg-success">Aktif</span>
+                            @else
+                            <span class="badge bg-secondary">Nonaktif</span>
+                            @endif
+                        </td>
+
+                        <td>
+                            @if($ta->status === 'nonaktif')
+                            <form action="{{ route('tahun-ajaran.activate', $ta->id) }}"
+                                method="POST" class="d-inline">
+                                @csrf
+                                @method('PATCH')
+                                <button class="btn btn-sm btn-success">
+                                    Aktifkan
+                                </button>
+                            </form>
+                            @endif
+
+                            <a href="{{ route('tahun-ajaran.edit', $ta->id) }}"
+                                class="btn btn-sm btn-warning">
+                                Edit
+                            </a>
+                        </td>
+
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="3" class="text-center">Belum ada data tahun ajaran</td>
-                        </tr>
+                    <tr>
+                        <td colspan="4" class="text-center">Belum ada data tahun ajaran</td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>

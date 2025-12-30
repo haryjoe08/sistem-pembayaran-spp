@@ -91,6 +91,8 @@
                   class="form-control @error('nama') is-invalid @enderror"
                   id="nama"
                   name="nama"
+                  type="text"
+                  oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')"
                   value="{{ old('nama') }}"
                   placeholder="Nama lengkap siswa"
                   required>
@@ -203,21 +205,21 @@
               </div>
 
               <div class="col-md-4 mb-3">
-                <label for="tahun_ajaran_id" class="form-label fw-semibold">
-                  Tahun Ajaran <span class="text-danger">*</span>
+                <label for="tahun_masuk" class="form-label fw-semibold">
+                  Tahun Masuk <span class="text-danger">*</span>
                 </label>
-                <select class="form-select @error('tahun_ajaran_id') is-invalid @enderror"
-                  id="tahun_ajaran_id"
-                  name="tahun_ajaran_id"
+                <input type="text"
+                  class="form-control @error('tahun_masuk') is-invalid @enderror"
+                  id="tahun_masuk"
+                  name="tahun_masuk"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="4"
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                  value="{{ old('tahun_masuk') }}"
+                  placeholder="Tahun Masuk siswa"
                   required>
-                  <option value="">-- Pilih Tahun Ajaran --</option>
-                  @foreach($tahunAjarans as $ta)
-                  <option value="{{ $ta->id }}" {{ old('tahun_ajaran_id') == $ta->id ? 'selected' : '' }}>
-                    {{ $ta->tahun }}
-                  </option>
-                  @endforeach
-                </select>
-                @error('tahun_ajaran_id')
+                @error('tahun_masuk')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
               </div>
@@ -277,9 +279,11 @@
                     placeholder="08xxxxxxxxxx"
                     inputmode="numeric"
                     pattern="[0-9]*"
-                    maxlength="15"
+                    minlength="10"
+                    maxlength="12"
                     oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     required>
+
                   @error('kontak')
                   <div class="invalid-feedback">{{ $message }}</div>
                   @enderror
@@ -354,69 +358,69 @@
 </div>
 
 <script>
-// Live Preview Login Credentials
-document.getElementById('nis').addEventListener('input', function() {
+  // Live Preview Login Credentials
+  document.getElementById('nis').addEventListener('input', function() {
     const nis = this.value;
     document.getElementById('preview-nis').textContent = nis || '-';
-});
+  });
 
-document.getElementById('tgl_lahir').addEventListener('change', function() {
+  document.getElementById('tgl_lahir').addEventListener('change', function() {
     const tglLahir = this.value; // Format: YYYY-MM-DD
     if (tglLahir) {
-        // Convert to ddmmyyyy
-        const [year, month, day] = tglLahir.split('-');
-        const password = day + month + year;
-        document.getElementById('preview-password').textContent = password;
+      // Convert to ddmmyyyy
+      const [year, month, day] = tglLahir.split('-');
+      const password = day + month + year;
+      document.getElementById('preview-password').textContent = password;
     } else {
-        document.getElementById('preview-password').textContent = '-';
+      document.getElementById('preview-password').textContent = '-';
     }
-});
+  });
 
-// Form validation before submit
-document.querySelector('form').addEventListener('submit', function(e) {
+  // Form validation before submit
+  document.querySelector('form').addEventListener('submit', function(e) {
     const nis = document.getElementById('nis').value;
     const nama = document.getElementById('nama').value;
     const tglLahir = document.getElementById('tgl_lahir').value;
-    
+
     if (!nis || !nama || !tglLahir) {
-        e.preventDefault();
-        alert('Mohon lengkapi data identitas siswa!');
-        return;
+      e.preventDefault();
+      alert('Mohon lengkapi data identitas siswa!');
+      return;
     }
-    
+
     // Confirm submit
     const confirmMsg = `Simpan data siswa baru?\n\n` +
-                      `NIS: ${nis}\n` +
-                      `Nama: ${nama}\n\n` +
-                      `Data login akan otomatis dibuat.`;
-    
-    if (!confirm(confirmMsg)) {
-        e.preventDefault();
-    }
-});
+      `NIS: ${nis}\n` +
+      `Nama: ${nama}\n\n` +
+      `Data login akan otomatis dibuat.`;
 
-// Auto capitalize nama
-document.getElementById('nama').addEventListener('blur', function() {
+    if (!confirm(confirmMsg)) {
+      e.preventDefault();
+    }
+  });
+
+  // Auto capitalize nama
+  document.getElementById('nama').addEventListener('blur', function() {
     this.value = this.value.toUpperCase();
-});
+  });
 </script>
 
 <style>
-.form-label {
-  margin-bottom: 0.5rem;
-}
+  .form-label {
+    margin-bottom: 0.5rem;
+  }
 
-.form-control:focus,
-.form-select:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-}
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  }
 
-#preview-nis,
-#preview-password {
-  font-family: monospace;
-  font-size: 1.1rem;
-  color: #0d6efd;
-}
+  #preview-nis,
+  #preview-password {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #0d6efd;
+  }
 </style>
 @endsection

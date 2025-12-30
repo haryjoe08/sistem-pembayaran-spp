@@ -8,16 +8,54 @@
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <h4 class="fw-bold text-dark mb-1">
-            <i class="bi bi-people-fill me-2 text-primary"></i>
-            Data Siswa
-          </h4>
-          <p class="text-muted mb-0">Manajemen data siswa MA Negeri</p>
+          <h4 class="fw-bold text-dark mb-1">Data Siswa</h4>
+          <p class="text-muted mb-0">Kelola data siswa</p>
         </div>
-        <a href="{{ route('siswa.create') }}" class="btn btn-primary">
-          <i class="bi bi-plus-circle me-1"></i>
-          Tambah Siswa
-        </a>
+        <div class="d-flex gap-2">
+          <!-- Export -->
+          <div class="btn-group">
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-download me-1"></i> Export
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="{{ route('siswa.export') }}">
+                  <i class="bi bi-file-earmark-excel me-2"></i> Export Semua
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('siswa.export', ['status' => 'aktif']) }}">
+                  <i class="bi bi-check-circle me-2"></i> Export Siswa Aktif
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('siswa.export', ['status' => 'lulus']) }}">
+                  <i class="bi bi-mortarboard me-2"></i> Export Siswa Lulus
+                </a>
+              </li>
+              @if(request('kelas_id'))
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('siswa.export', array_merge(request()->all(), ['status' => request('status', 'aktif')])) }}">
+                  <i class="bi bi-funnel me-2"></i> Export Filter Aktif
+                </a>
+              </li>
+              @endif
+            </ul>
+          </div>
+
+          <!-- Import -->
+          <a href="{{ route('siswa.import-form') }}" class="btn btn-info">
+            <i class="bi bi-upload me-1"></i> Import
+          </a>
+
+          <!-- Tambah -->
+          <a href="{{ route('siswa.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Siswa
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -46,10 +84,12 @@
   <!-- Filter & Search -->
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-body p-3">
-      <form action="{{ route('siswa.index') }}" method="GET">
+      <form action="{{ route('siswa.index') }}" method="GET" id="filterForm">
         <div class="row g-3 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label small text-muted">Cari Siswa</label>
+
+          <!-- Search -->
+          <div class="col-md-3">
+            <label class="form-label small text-muted fw-bold">Cari Siswa</label>
             <div class="input-group">
               <span class="input-group-text bg-light border-end-0">
                 <i class="bi bi-search text-muted"></i>
@@ -61,18 +101,51 @@
                 value="{{ request('search') }}">
             </div>
           </div>
-          <div class="col-md-3">
-            <label class="form-label small text-muted">Filter Kelas</label>
+
+          <!-- Filter Kelas -->
+          <div class="col-md-2">
+            <label class="form-label small text-muted fw-bold">Filter Kelas</label>
             <select class="form-select" name="kelas">
               <option value="">Semua Kelas</option>
-              @foreach(\App\Models\Kelas::orderBy('kelas')->get() as $k)
-              <option value="{{ $k->kelas }}" {{ request('kelas') == $k->kelas ? 'selected' : '' }}>
+              @foreach(\App\Models\Kelas::where('status', 'aktif')->orderBy('kelas')->get() as $k)
+              <option value="{{ $k->id }}" {{ request('kelas') == $k->id ? 'selected' : '' }}>
                 {{ $k->kelas }}
               </option>
               @endforeach
             </select>
           </div>
-          <div class="col-md-5">
+
+          <!-- Filter Jurusan -->
+          <div class="col-md-2">
+            <label class="form-label small text-muted fw-bold">Filter Jurusan</label>
+            <select class="form-select" name="jurusan">
+              <option value="">Semua Jurusan</option>
+              @foreach(\App\Models\Jurusan::where('status', 'aktif')->orderBy('nama')->get() as $j)
+              <option value="{{ $j->id }}" {{ request('jurusan') == $j->id ? 'selected' : '' }}>
+                {{ $j->nama }}
+              </option>
+              @endforeach
+            </select>
+          </div>
+
+          <!-- Filter Status -->
+          <div class="col-md-2">
+            <label class="form-label small text-muted fw-bold">Filter Status</label>
+            <select class="form-select" name="status">
+              <option value="aktif" {{ request('status', 'aktif') == 'aktif' ? 'selected' : '' }}>
+                Aktif
+              </option>
+              <option value="tidak_aktif" {{ request('status') == 'tidak_aktif' ? 'selected' : '' }}>
+                Tidak Aktif
+              </option>
+              <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>
+                Semua Status
+              </option>
+            </select>
+          </div>
+
+          <!-- Buttons -->
+          <div class="col-md-3">
             <div class="d-flex gap-2">
               <button type="submit" class="btn btn-primary">
                 <i class="bi bi-search me-1"></i> Cari
@@ -86,6 +159,7 @@
       </form>
     </div>
   </div>
+
 
   <!-- Table -->
   <div class="card border-0 shadow-sm">
@@ -107,7 +181,8 @@
               <th class="py-3">Jurusan</th>
               <th class="py-3">Jenis Kelamin</th>
               <th class="py-3">Kontak</th>
-              <th class="py-3 text-center">Aksi</th>
+              <th class="py-3">Status</th>
+              <th class="py-3 ">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -121,12 +196,9 @@
               </td>
               <td class="py-3">
                 <div class="d-flex align-items-center">
-                  <img src="https://ui-avatars.com/api/?name={{ urlencode($s->nama) }}&size=32&background=667eea&color=fff"
-                    class="rounded-circle me-2"
-                    width="32" height="32">
                   <div>
                     <div class="fw-semibold">{{ $s->nama }}</div>
-                    <small class="text-muted">{{ $s->wali }}</small>
+
                   </div>
                 </div>
               </td>
@@ -146,57 +218,59 @@
                   <i class="bi bi-telephone"></i> {{ $s->kontak }}
                 </small>
               </td>
-              <td class="py-3">
-                <div class="btn-group btn-group-sm">
+              <td>
+                <span class="badge {{ $s->statusBadgeClass() }}">
+                  {{ $s->statusLabel() }}
+                </span>
+              </td>
+              <td>
+                <a href="{{ route('siswa.show', $s->nis) }}"
+                  class="btn btn-outline-primary"
+                  data-bs-toggle="tooltip"
+                  title="Detail">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <div class="btn-group btn-group-sm gap-2">
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown">
+                      <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li>
+                        <h6 class="dropdown-header">Ubah Status</h6>
+                      </li>
+                      <li>
+                        <hr class="dropdown-divider">
+                      </li>
+                      @foreach(['aktif', 'tidak_aktif'] as $status)
+                      <li>
+                        <form action="{{ route('siswa.update-status', $s->nis) }}"
+                          method="POST"
+                          class="d-inline">
+                          @csrf
+                          <input type="hidden" name="status" value="{{ $status }}">
+                          <button type="submit"
+                            class="dropdown-item"
+                            onclick="return confirm('Yakin mengubah status menjadi {{ ucfirst(str_replace('_', ' ', $status)) }}?')">
+                            <i class="bi bi-circle-fill me-2" style="font-size: 8px; color: {{ match($status) {
+                                'aktif' => '#198754',
+                                'tidak_aktif' => '#6c757d',
+                            } }}"></i>
+                            {{ ucfirst(str_replace('_', ' ', $status)) }}
+                          </button>
+                        </form>
+                      </li>
+                      @endforeach
+                    </ul>
+                  </div>
                   <a href="{{ route('siswa.edit', $s->nis) }}"
                     class="btn btn-outline-warning"
                     data-bs-toggle="tooltip"
                     title="Edit">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <button type="button"
-                    class="btn btn-outline-danger"
-                    data-bs-toggle="modal"
-                    data-bs-target="#deleteModal{{ $s->nis }}"
-                    title="Hapus">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </div>
-
-                <!-- Delete Modal -->
-                <div class="modal fade" id="deleteModal{{ $s->nis }}" tabindex="-1">
-                  <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                      <div class="modal-header bg-danger text-white">
-                        <h6 class="modal-title">
-                          <i class="bi bi-exclamation-triangle me-2"></i>
-                          Konfirmasi Hapus
-                        </h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body">
-                        <p class="mb-2">Apakah Anda yakin ingin menghapus siswa:</p>
-                        <div class="alert alert-light">
-                          <strong>{{ $s->nama }}</strong><br>
-                          <small class="text-muted">NIS: {{ $s->nis }}</small>
-                        </div>
-                        <p class="text-danger small mb-0">
-                          <i class="bi bi-exclamation-circle me-1"></i>
-                          Data yang dihapus tidak dapat dikembalikan!
-                        </p>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <form action="{{ route('siswa.destroy', $s->nis) }}" method="POST" class="d-inline">
-                          @csrf
-                          @method('DELETE')
-                          <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash me-1"></i> Hapus
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </td>
             </tr>
@@ -229,17 +303,36 @@
 </div>
 
 <style>
-  #toast-container>.toast {
-    
-    opacity: 0.95 !important;
+  #toast-container>div {
+    opacity: 1 !important;
+    background-image: none !important;
   }
-    .table-hover tbody tr:hover {
-      background-color: rgba(13, 110, 253, 0.05);
-    }
 
-    .btn-group-sm .btn {
-      padding: 4px 8px;
-    }
+  .toast-success {
+    background-color: #198754 !important;
+  }
+
+  .toast-error {
+    background-color: #dc3545 !important;
+  }
+
+  .toast-info {
+    background-color: #0dcaf0 !important;
+  }
+
+  .toast-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+  }
+
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  .btn-group-sm .btn {
+    padding: 4px 8px;
+  }
 </style>
 
 <script>
@@ -250,8 +343,6 @@
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
   });
-
-  
 </script>
 @if(session('success'))
 @push('scripts')

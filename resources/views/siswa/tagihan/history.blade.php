@@ -58,7 +58,7 @@
 
               <!-- Details -->
               <div class="col-lg-6 mb-3 mb-lg-0">
-                <h6 class="fw-bold mb-2">{{ $t->tagihan->jenisPembayaran->nama ?? 'Pembayaran' }}</h6>
+                <h6 class="fw-bold mb-2">{{ $t->tagihan->jenisTagihan->nama ?? 'Pembayaran' }}</h6>
                 <div class="d-flex gap-3 flex-wrap">
                   <div>
                     <small class="text-muted d-block">ID Transaksi</small>

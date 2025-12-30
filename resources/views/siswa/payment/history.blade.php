@@ -105,7 +105,7 @@
                   <i class="bi {{ $payment->isSuccess() ? 'bi-check-circle text-success' : ($payment->isPending() ? 'bi-clock text-warning' : 'bi-x-circle text-danger') }} fs-4"></i>
                 </div>
                 <div class="flex-grow-1">
-                  <h6 class="fw-bold mb-1">{{ $payment->tagihan->jenisPembayaran->nama }}</h6>
+                  <h6 class="fw-bold mb-1">{{ $payment->tagihan->jenisTagihan->nama }}</h6>
                   <p class="text-muted small mb-1">
                     <i class="bi bi-hash"></i> {{ $payment->order_id }}
                   </p>

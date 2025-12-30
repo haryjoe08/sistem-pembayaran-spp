@@ -404,47 +404,23 @@
             <li>
                 <a href="{{ route('siswa.history') }}">
                     <i class="fas fa-history"></i>
-                    <span>History Pembayaran</span>
+                    <span>Riwayat Transaksi</span>
                 </a>
             </li>
             <li>
-                <a href="#">
-                    <i class="fas fa-receipt"></i>
-                    <span>Kwitansi</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Laporan</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
+                <a href="{{route('siswa.profil') }}">
                     <i class="fas fa-user-circle"></i>
                     <span>Profil Saya</span>
                 </a>
             </li>
-            <li>
-                <a href="#">
-                    <i class="fas fa-cog"></i>
-                    <span>Pengaturan</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <i class="fas fa-question-circle"></i>
-                    <span>Bantuan</span>
-                </a>
-            </li>
 
             <!-- Logout -->
-            <li>
-                <a href="#" onclick="event.preventDefault(); alert('Logout functionality');">
-                    <i class="fas fa-sign-out-alt me-2"></i>
-                    <span>Keluar</span>
-                </a>
-            </li>
+            <form method="POST" action="{{ route('logout') }}" class="mt-4 px-3">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">
+                    Logout
+                </button>
+            </form>
         </ul>
 
 
@@ -459,10 +435,7 @@
             </button>
 
             <div class="top-nav-right">
-                <button class="notification-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge">3</span>
-                </button>
+            
 
                 <div class="user-info">
                     <img src="{{ asset('assets/img/avatar.png') }}" alt="User">

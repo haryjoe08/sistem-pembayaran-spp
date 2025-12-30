@@ -31,7 +31,7 @@ class SiswaSideController extends Controller
 
         // Tagihan terbaru (5 teratas)
         $tagihanTerbaru = Tagihan::where('siswa_nis', $siswa->nis)
-            ->with('jenisPembayaran')
+            ->with('jenisTagihan')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
@@ -72,7 +72,7 @@ class SiswaSideController extends Controller
 
         $tagihans = Tagihan::where('siswa_nis', $siswa->nis)
             ->where('status', 'belum lunas')
-            ->with('jenisPembayaran')
+            ->with('jenisTagihan')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -106,7 +106,7 @@ class SiswaSideController extends Controller
         }
 
         $tagihans = Tagihan::where('siswa_nis', $siswa->nis)
-            ->with('jenisPembayaran')
+            ->with('jenisTagihan')
             ->orderBy('jatuh_tempo', 'asc')
             ->paginate(10);
 
@@ -133,7 +133,7 @@ class SiswaSideController extends Controller
         }
 
         $transaksi = Transaksi::where('siswa_nis', $siswa->nis)
-            ->with('tagihan.jenisPembayaran')
+            ->with('tagihan.jenisTagihan')
             ->orderBy('tanggal', 'desc')
             ->paginate(15);
 
@@ -155,7 +155,7 @@ class SiswaSideController extends Controller
 
         $transaksi = Transaksi::where('siswa_nis', $siswa->nis)
             ->where('id', $transaksiId)
-            ->with(['siswa.kelas', 'tagihan.jenisPembayaran'])
+            ->with(['siswa.kelas', 'tagihan.jenisTagihan'])
             ->firstOrFail();
 
         return view('siswa.tagihan.kwitansi', compact('transaksi'));
@@ -166,12 +166,15 @@ class SiswaSideController extends Controller
      */
     public function profil()
     {
-        $siswa = Auth::user()->siswa;
+        $user = Auth::user();
 
-        if (!$siswa) {
-            return redirect()->route('login')->withErrors(['error' => 'Data siswa tidak ditemukan.']);
+        if ($user->role === 'admin') {
+            $nama = \App\Models\Admin::where('login_id', $user->id)->value('nama');
+        } else {
+            $nama = \App\Models\Siswa::where('login_id', $user->id)->value('nama');
         }
 
-        return view('siswa.profil', compact('siswa'));
+        return view('siswa.profile', compact('user', 'nama'));
+
     }
 }

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid p-4">
-  
+
   <!-- Header -->
   <div class="row mb-4">
     <div class="col-12">
@@ -25,7 +25,7 @@
 
   <div class="row justify-content-center">
     <div class="col-lg-10">
-      
+
       <!-- Student Info Card -->
       <div class="card border-0 shadow-sm mb-3">
         <div class="card-body p-3 bg-light">
@@ -68,7 +68,7 @@
           @method('PUT')
 
           <div class="card-body p-4">
-            
+
             <!-- Info Alert -->
             <div class="alert alert-warning d-flex align-items-start mb-4">
               <i class="bi bi-exclamation-triangle me-3 fs-5"></i>
@@ -87,7 +87,7 @@
               <i class="bi bi-person-badge me-2 text-warning"></i>
               Data Identitas
             </h6>
-            
+
             <div class="row mb-3">
               <div class="col-md-6 mb-3">
                 <label for="nis" class="form-label fw-semibold">
@@ -97,12 +97,12 @@
                   <span class="input-group-text bg-light">
                     <i class="bi bi-lock-fill text-muted"></i>
                   </span>
-                  <input type="text" 
-                         class="form-control bg-light" 
-                         id="nis" 
-                         name="nis" 
-                         value="{{ $siswa->nis }}"
-                         readonly>
+                  <input type="text"
+                    class="form-control bg-light"
+                    id="nis"
+                    name="nis"
+                    value="{{ $siswa->nis }}"
+                    readonly>
                 </div>
                 <div class="form-text">
                   <i class="bi bi-info-circle me-1"></i>
@@ -114,15 +114,15 @@
                 <label for="nama" class="form-label fw-semibold">
                   Nama Lengkap <span class="text-danger">*</span>
                 </label>
-                <input type="text" 
-                       class="form-control @error('nama') is-invalid @enderror" 
-                       id="nama" 
-                       name="nama" 
-                       value="{{ old('nama', $siswa->nama) }}"
-                       placeholder="Nama lengkap siswa"
-                       required>
+                <input type="text"
+                  class="form-control @error('nama') is-invalid @enderror"
+                  id="nama"
+                  name="nama"
+                  value="{{ old('nama', $siswa->nama) }}"
+                  placeholder="Nama lengkap siswa"
+                  required>
                 @error('nama')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
               </div>
 
@@ -130,15 +130,15 @@
                 <label for="tgl_lahir" class="form-label fw-semibold">
                   Tanggal Lahir <span class="text-danger">*</span>
                 </label>
-                <input type="date" 
-                       class="form-control @error('tgl_lahir') is-invalid @enderror" 
-                       id="tgl_lahir" 
-                       name="tgl_lahir" 
-                       value="{{ old('tgl_lahir', $siswa->tgl_lahir) }}"
-                       max="{{ date('Y-m-d') }}"
-                       required>
+                <input type="date"
+                  class="form-control @error('tgl_lahir') is-invalid @enderror"
+                  id="tgl_lahir"
+                  name="tgl_lahir"
+                  value="{{ old('tgl_lahir', $siswa->tgl_lahir) }}"
+                  max="{{ date('Y-m-d') }}"
+                  required>
                 @error('tgl_lahir')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
                 <div class="form-text text-warning">
                   <i class="bi bi-exclamation-triangle me-1"></i>
@@ -152,32 +152,32 @@
                 </label>
                 <div class="d-flex gap-4 mt-2">
                   <div class="form-check">
-                    <input class="form-check-input" 
-                           type="radio" 
-                           name="jenis_kelamin" 
-                           id="jk_l" 
-                           value="L"
-                           {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'L' ? 'checked' : '' }}
-                           required>
+                    <input class="form-check-input"
+                      type="radio"
+                      name="jenis_kelamin"
+                      id="jk_l"
+                      value="L"
+                      {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'L' ? 'checked' : '' }}
+                      required>
                     <label class="form-check-label" for="jk_l">
                       <i class="bi bi-gender-male text-primary"></i> Laki-laki
                     </label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input" 
-                           type="radio" 
-                           name="jenis_kelamin" 
-                           id="jk_p" 
-                           value="P"
-                           {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'P' ? 'checked' : '' }}
-                           required>
+                    <input class="form-check-input"
+                      type="radio"
+                      name="jenis_kelamin"
+                      id="jk_p"
+                      value="P"
+                      {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'P' ? 'checked' : '' }}
+                      required>
                     <label class="form-check-label" for="jk_p">
                       <i class="bi bi-gender-female text-danger"></i> Perempuan
                     </label>
                   </div>
                 </div>
                 @error('jenis_kelamin')
-                  <div class="text-danger small mt-1">{{ $message }}</div>
+                <div class="text-danger small mt-1">{{ $message }}</div>
                 @enderror
               </div>
             </div>
@@ -193,20 +193,20 @@
                 <label for="kelas_id" class="form-label fw-semibold">
                   Kelas <span class="text-danger">*</span>
                 </label>
-                <select class="form-select @error('kelas_id') is-invalid @enderror" 
-                        id="kelas_id" 
-                        name="kelas_id"
-                        required>
+                <select class="form-select @error('kelas_id') is-invalid @enderror"
+                  id="kelas_id"
+                  name="kelas_id"
+                  required>
                   <option value="">-- Pilih Kelas --</option>
                   @foreach($kelas as $k)
-                    <option value="{{ $k->id }}" 
-                            {{ old('kelas_id', $siswa->kelas_id) == $k->id ? 'selected' : '' }}>
-                      {{ $k->kelas }}
-                    </option>
+                  <option value="{{ $k->id }}"
+                    {{ old('kelas_id', $siswa->kelas_id) == $k->id ? 'selected' : '' }}>
+                    {{ $k->kelas }}
+                  </option>
                   @endforeach
                 </select>
                 @error('kelas_id')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
               </div>
 
@@ -214,41 +214,36 @@
                 <label for="jurusan_id" class="form-label fw-semibold">
                   Jurusan <span class="text-danger">*</span>
                 </label>
-                <select class="form-select @error('jurusan_id') is-invalid @enderror" 
-                        id="jurusan_id" 
-                        name="jurusan_id"
-                        required>
+                <select class="form-select @error('jurusan_id') is-invalid @enderror"
+                  id="jurusan_id"
+                  name="jurusan_id"
+                  required>
                   <option value="">-- Pilih Jurusan --</option>
                   @foreach($jurusan as $j)
-                    <option value="{{ $j->id }}" 
-                            {{ old('jurusan_id', $siswa->jurusan_id) == $j->id ? 'selected' : '' }}>
-                      {{ $j->nama }}
-                    </option>
+                  <option value="{{ $j->id }}"
+                    {{ old('jurusan_id', $siswa->jurusan_id) == $j->id ? 'selected' : '' }}>
+                    {{ $j->nama }}
+                  </option>
                   @endforeach
                 </select>
                 @error('jurusan_id')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
               </div>
 
               <div class="col-md-4 mb-3">
-                <label for="tahun_ajaran_id" class="form-label fw-semibold">
-                  Tahun Ajaran <span class="text-danger">*</span>
+                <label for="tahun_masuk" class="form-label fw-semibold">
+                  Tahun Masuk <span class="text-danger">*</span>
                 </label>
-                <select class="form-select @error('tahun_ajaran_id') is-invalid @enderror" 
-                        id="tahun_ajaran_id" 
-                        name="tahun_ajaran_id"
-                        required>
-                  <option value="">-- Pilih Tahun Ajaran --</option>
-                  @foreach($tahunAjarans as $ta)
-                    <option value="{{ $ta->id }}" 
-                            {{ old('tahun_ajaran_id', $siswa->tahun_ajaran_id) == $ta->id ? 'selected' : '' }}>
-                      {{ $ta->tahun }}
-                    </option>
-                  @endforeach
-                </select>
-                @error('tahun_ajaran_id')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                <input type="text"
+                  class="form-control @error('tahun_masuk') is-invalid @enderror"
+                  id="tahun_masuk"
+                  name="tahun_masuk"
+                  value="{{ old('tahun_masuk', $siswa->tahun_masuk) }}"
+                  placeholder="Tahun Masuk Siswa"
+                  required>
+                @error('tahun_masuk')
+                <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
               </div>
             </div>
@@ -264,14 +259,14 @@
                 <label for="alamat" class="form-label fw-semibold">
                   Alamat <span class="text-danger">*</span>
                 </label>
-                <textarea class="form-control @error('alamat') is-invalid @enderror" 
-                          id="alamat" 
-                          name="alamat" 
-                          rows="3"
-                          placeholder="Alamat lengkap siswa"
-                          required>{{ old('alamat', $siswa->alamat) }}</textarea>
+                <textarea class="form-control @error('alamat') is-invalid @enderror"
+                  id="alamat"
+                  name="alamat"
+                  rows="3"
+                  placeholder="Alamat lengkap siswa"
+                  required>{{ old('alamat', $siswa->alamat) }}</textarea>
                 @error('alamat')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
               </div>
 
@@ -279,15 +274,15 @@
                 <label for="wali" class="form-label fw-semibold">
                   Nama Wali <span class="text-danger">*</span>
                 </label>
-                <input type="text" 
-                       class="form-control @error('wali') is-invalid @enderror" 
-                       id="wali" 
-                       name="wali" 
-                       value="{{ old('wali', $siswa->wali) }}"
-                       placeholder="Nama orang tua/wali"
-                       required>
+                <input type="text"
+                  class="form-control @error('wali') is-invalid @enderror"
+                  id="wali"
+                  name="wali"
+                  value="{{ old('wali', $siswa->wali) }}"
+                  placeholder="Nama orang tua/wali"
+                  required>
                 @error('wali')
-                  <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
               </div>
 
@@ -299,19 +294,19 @@
                   <span class="input-group-text">
                     <i class="bi bi-whatsapp"></i>
                   </span>
-                  <input type="text" 
-                         class="form-control @error('kontak') is-invalid @enderror" 
-                         id="kontak" 
-                         name="kontak" 
-                         value="{{ old('kontak', $siswa->kontak) }}"
-                         placeholder="08xxxxxxxxxx"
-                         inputmode="numeric"
-                         pattern="[0-9]*"
-                         maxlength="15"
-                         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                         required>
+                  <input type="text"
+                    class="form-control @error('kontak') is-invalid @enderror"
+                    id="kontak"
+                    name="kontak"
+                    value="{{ old('kontak', $siswa->kontak) }}"
+                    placeholder="08xxxxxxxxxx"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="15"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                    required>
                   @error('kontak')
-                    <div class="invalid-feedback">{{ $message }}</div>
+                  <div class="invalid-feedback">{{ $message }}</div>
                   @enderror
                 </div>
               </div>
@@ -383,80 +378,80 @@
 </div>
 
 <script>
-// Track tanggal lahir changes untuk password preview
-const originalTglLahir = '{{ $siswa->tgl_lahir }}';
+  // Track tanggal lahir changes untuk password preview
+  const originalTglLahir = '{{ $siswa->tgl_lahir }}';
 
-document.getElementById('tgl_lahir').addEventListener('change', function() {
+  document.getElementById('tgl_lahir').addEventListener('change', function() {
     const tglLahir = this.value;
-    
+
     if (tglLahir && tglLahir !== originalTglLahir) {
-        // Convert to ddmmyyyy
-        const [year, month, day] = tglLahir.split('-');
-        const newPassword = day + month + year;
-        
-        document.getElementById('new-password').textContent = newPassword;
-        document.getElementById('new-password').parentElement.classList.add('bg-warning', 'bg-opacity-10', 'p-2', 'rounded');
+      // Convert to ddmmyyyy
+      const [year, month, day] = tglLahir.split('-');
+      const newPassword = day + month + year;
+
+      document.getElementById('new-password').textContent = newPassword;
+      document.getElementById('new-password').parentElement.classList.add('bg-warning', 'bg-opacity-10', 'p-2', 'rounded');
     } else {
-        // Reset to original
-        const [year, month, day] = originalTglLahir.split('-');
-        const oldPassword = day + month + year;
-        document.getElementById('new-password').textContent = oldPassword;
-        document.getElementById('new-password').parentElement.classList.remove('bg-warning', 'bg-opacity-10', 'p-2', 'rounded');
+      // Reset to original
+      const [year, month, day] = originalTglLahir.split('-');
+      const oldPassword = day + month + year;
+      document.getElementById('new-password').textContent = oldPassword;
+      document.getElementById('new-password').parentElement.classList.remove('bg-warning', 'bg-opacity-10', 'p-2', 'rounded');
     }
-});
+  });
 
-// Auto capitalize nama
-document.getElementById('nama').addEventListener('blur', function() {
+  // Auto capitalize nama
+  document.getElementById('nama').addEventListener('blur', function() {
     this.value = this.value.toUpperCase();
-});
+  });
 
-// Confirmation before submit
-document.querySelector('form').addEventListener('submit', function(e) {
+  // Confirmation before submit
+  document.querySelector('form').addEventListener('submit', function(e) {
     const tglLahir = document.getElementById('tgl_lahir').value;
-    
-    let confirmMsg = `Simpan perubahan data siswa?\n\n` +
-                    `Nama: ${document.getElementById('nama').value}\n` +
-                    `NIS: ${document.getElementById('nis').value}`;
-    
-    if (tglLahir !== originalTglLahir) {
-        const [year, month, day] = tglLahir.split('-');
-        const newPassword = day + month + year;
-        confirmMsg += `\n\n⚠️ PERHATIAN:\nPassword login akan berubah menjadi: ${newPassword}`;
-    }
-    
-    if (!confirm(confirmMsg)) {
-        e.preventDefault();
-    }
-});
 
-// Highlight changed fields
-const formInputs = document.querySelectorAll('input:not([readonly]), select, textarea');
-formInputs.forEach(input => {
+    let confirmMsg = `Simpan perubahan data siswa?\n\n` +
+      `Nama: ${document.getElementById('nama').value}\n` +
+      `NIS: ${document.getElementById('nis').value}`;
+
+    if (tglLahir !== originalTglLahir) {
+      const [year, month, day] = tglLahir.split('-');
+      const newPassword = day + month + year;
+      confirmMsg += `\n\n⚠️ PERHATIAN:\nPassword login akan berubah menjadi: ${newPassword}`;
+    }
+
+    if (!confirm(confirmMsg)) {
+      e.preventDefault();
+    }
+  });
+
+  // Highlight changed fields
+  const formInputs = document.querySelectorAll('input:not([readonly]), select, textarea');
+  formInputs.forEach(input => {
     const originalValue = input.value;
-    
+
     input.addEventListener('change', function() {
-        if (this.value !== originalValue) {
-            this.classList.add('border-warning', 'border-2');
-        } else {
-            this.classList.remove('border-warning', 'border-2');
-        }
+      if (this.value !== originalValue) {
+        this.classList.add('border-warning', 'border-2');
+      } else {
+        this.classList.remove('border-warning', 'border-2');
+      }
     });
-});
+  });
 </script>
 
 <style>
-.bg-light input[readonly] {
-  cursor: not-allowed;
-}
+  .bg-light input[readonly] {
+    cursor: not-allowed;
+  }
 
-.border-2 {
-  border-width: 2px !important;
-}
+  .border-2 {
+    border-width: 2px !important;
+  }
 
-.form-control:focus,
-.form-select:focus {
-  border-color: #ffc107;
-  box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.15);
-}
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.15);
+  }
 </style>
 @endsection

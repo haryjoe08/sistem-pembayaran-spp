@@ -155,8 +155,8 @@
 
           <div class="row">
             <div class="col-12">
-              <small class="text-muted d-block mb-1">Jenis Pembayaran</small>
-              <h6 class="fw-bold mb-0">{{ $paymentOrder->tagihan->jenisPembayaran->nama }}</h6>
+              <small class="text-muted d-block mb-1">Jenis Tagihan</small>
+              <h6 class="fw-bold mb-0">{{ $paymentOrder->tagihan->jenisTagihan->nama }}</h6>
             </div>
           </div>
         </div>

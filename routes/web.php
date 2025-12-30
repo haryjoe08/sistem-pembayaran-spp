@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CatatPembayaranController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\SiswaController;
@@ -8,13 +9,15 @@ use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\JenisPembayaranController;
+use App\Http\Controllers\KenaikanKelasController;
 use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\TerimaPembayaranController;
 use App\Http\Controllers\TransaksiController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SiswaSideController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TarifTagihanController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -33,6 +36,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard', [AuthController::class, 'adminDashboard'])->name('admin.dashboard');
     Route::get('/siswa/dashboard', [AuthController::class, 'siswaDashboard'])->name('siswa.dashboard');
+    Route::get('/kepala-sekolah/dashboard', [AuthController::class, 'kepsekDashboard'])->middleware('auth');
 });
 
 // ======================== ROOT REDIRECT ========================
@@ -53,24 +57,86 @@ Route::middleware(['auth'])->group(function () {
 
 // ======================== CRUD MASTER DATA ========================
 Route::middleware(['auth'])->group(function () {
+    // Naik Kelas
+    Route::get('/siswa/naik-kelas', [SiswaController::class, 'showNaikKelas'])->name('siswa.naik-kelas');
+    Route::post('/siswa/proses-naik-kelas', [SiswaController::class, 'prosesNaikKelas'])->name('siswa.proses-naik-kelas');
+
+    // AJAX Get Siswa by Kelas
+    Route::get('/api/siswa/kelas/{kelasId}', [SiswaController::class, 'getSiswaByKelas'])->name('siswa.by-kelas');
+
+    // Update Status
+    Route::post('/siswa/{nis}/update-status', [SiswaController::class, 'updateStatus'])->name('siswa.update-status');
+    Route::post('/siswa/bulk-update-status', [SiswaController::class, 'bulkUpdateStatus'])->name('siswa.bulk-update-status');
+
     // Siswa
+       // Export & Import
+    Route::get('siswa-export', [SiswaController::class, 'export'])->name('siswa.export');
+    Route::get('siswa-template', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
+    Route::get('siswa-import-form', [SiswaController::class, 'importForm'])->name('siswa.import-form');
+    Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
     Route::resource('siswa', SiswaController::class);
-    
+
     // Tahun Ajaran
+    Route::patch(
+        '/tahun-ajaran/{tahunAjaran}/activate',
+        [TahunAjaranController::class, 'activate']
+    )->name('tahun-ajaran.activate');
+
     Route::resource('tahun-ajaran', TahunAjaranController::class);
 
     // Kelas
+    Route::patch('/kelas/{id}/nonaktif', [KelasController::class, 'nonaktif'])->name('kelas.nonaktif');
+    Route::patch('/kelas/{id}/aktifkan', [KelasController::class, 'aktifkan'])->name('kelas.aktifkan');
+
     Route::resource('kelas', KelasController::class);
 
     // Jurusan
+    Route::patch('/jurusan/{id}/nonaktif', [JurusanController::class, 'nonaktif'])
+        ->name('jurusan.nonaktif');
+
+    Route::patch('/jurusan/{id}/aktifkan', [JurusanController::class, 'aktifkan'])
+        ->name('jurusan.aktifkan');
+
     Route::resource('jurusan', JurusanController::class);
 
+    // Kenaikan Kelas (Simple Version)
+    Route::get('/kenaikan-kelas', [KenaikanKelasController::class, 'index'])
+        ->name('admin.kenaikan-kelas.index');
 
+    Route::post('/kenaikan-kelas/preview', [KenaikanKelasController::class, 'preview'])
+        ->name('admin.kenaikan-kelas.preview');
+
+    Route::post('/kenaikan-kelas/execute', [KenaikanKelasController::class, 'execute'])
+        ->name('admin.kenaikan-kelas.execute');
 
     // Jenis Pembayaran
+    Route::patch(
+        '/jenis-pembayaran/{jenis_pembayaran}/nonaktifkan',
+        [JenisPembayaranController::class, 'nonaktifkan']
+    )->name('jenis-pembayaran.nonaktifkan');
+
+    Route::patch(
+        '/jenis-pembayaran/{jenis_pembayaran}/aktifkan',
+        [JenisPembayaranController::class, 'aktifkan']
+    )->name('jenis-pembayaran.aktifkan');
+
     Route::resource('jenis-pembayaran', JenisPembayaranController::class);
 
+
+    // Tarif Tagihan
+    Route::patch('/tarif-tagihan/{id}/aktifkan', [TarifTagihanController::class, 'aktifkan'])
+        ->name('tarif-tagihan.aktifkan');
+
+    Route::patch('/tarif-tagihan/{id}/nonaktif', [TarifTagihanController::class, 'nonaktif'])
+        ->name('tarif-tagihan.nonaktif');
+
+    Route::resource('tarif-tagihan', TarifTagihanController::class);
+
+
+
     //Tagihan
+    Route::get('/tagihan/get-tarif', [TagihanController::class, 'getTarif'])
+        ->name('tagihan.get-tarif');
     Route::resource('tagihan', TagihanController::class);
 
     // Tambahan untuk bulk operations
@@ -80,11 +146,11 @@ Route::middleware(['auth'])->group(function () {
 
 
     //Terima Pembayaran
-    Route::get('/terima-pembayaran', [TerimaPembayaranController::class, 'index'])->name('pembayaran.index');
-    Route::get('/terima-pembayaran/cari', [TerimaPembayaranController::class, 'cari'])->name('pembayaran.cari');
-    Route::post('/terima-pembayaran/proses/{id}', [TerimaPembayaranController::class, 'proses'])->name('pembayaran.proses');
-    Route::get('/terima-pembayaran/kwitansi/{transaksi}', [TerimaPembayaranController::class, 'showKwitansi'])->name('pembayaran.kwitansi');
-    Route::get('/terima-pembayaran/kwitansi/{transaksi}/print', [TerimaPembayaranController::class, 'printKwitansi'])->name('pembayaran.kwitansi.print');
+    Route::get('/catat-pembayaran', [CatatPembayaranController::class, 'index'])->name('pembayaran.index');
+    Route::get('/catat-pembayaran/cari', [CatatPembayaranController::class, 'cari'])->name('pembayaran.cari');
+    Route::post('/catat-pembayaran/proses/{id}', [CatatPembayaranController::class, 'proses'])->name('pembayaran.proses');
+    Route::get('/catat-pembayaran/kwitansi/{transaksi}', [CatatPembayaranController::class, 'showKwitansi'])->name('pembayaran.kwitansi');
+    Route::get('/catat-pembayaran/kwitansi/{transaksi}/print', [CatatPembayaranController::class, 'printKwitansi'])->name('pembayaran.kwitansi.print');
 
     // Riwayat Transaksi
     Route::prefix('transaksi')->middleware('auth')->group(function () {
@@ -119,12 +185,12 @@ Route::middleware(['auth'])->group(function () {
 
 
 // Payment Routes (Siswa & Admin)
-Route::prefix('payment')->middleware('auth')->group(function() {
+Route::prefix('payment')->middleware('auth')->group(function () {
     Route::get('/tagihan/{tagihan}', [PaymentController::class, 'index'])->name('payment.index');
     Route::post('/create/{tagihan}', [PaymentController::class, 'create'])->name('payment.create');
     Route::get('/check-status/{orderId}', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
     Route::get('/detail/{orderId}', [PaymentController::class, 'detail'])->name('payment.detail');
-    
+
     // Callback URLs
     Route::get('/finish', [PaymentController::class, 'finish'])->name('payment.finish');
     Route::get('/unfinish', [PaymentController::class, 'unfinish'])->name('payment.unfinish');
@@ -136,5 +202,5 @@ Route::post('/payment/notification', [PaymentController::class, 'notification'])
 
 // Payment History (Siswa only)
 Route::get('/siswa/payment-history', [PaymentController::class, 'history'])
-     ->middleware(['auth', 'role:siswa'])
-     ->name('siswa.payment.history');
+    ->middleware(['auth', 'role:siswa'])
+    ->name('siswa.payment.history');

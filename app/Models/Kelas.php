@@ -13,10 +13,16 @@ class Kelas extends Model
     protected $fillable = [
         'kelas',
         'tahun_ajaran_id',
+        'status',
     ];
 
     public function siswa()
     {
         return $this->hasMany(Siswa::class, 'kelas_id');
     }
+    public function tagihan()
+{
+    return $this->hasMany(Tagihan::class, 'kelas_id');
+}
+
 }

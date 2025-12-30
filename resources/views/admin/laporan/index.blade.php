@@ -134,13 +134,13 @@
       </div>
     </div>
 
-    <!-- Top Jenis Pembayaran -->
+    <!-- Top Jenis Tagihan -->
     <div class="col-lg-4 mb-4">
       <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-bottom py-3">
           <h6 class="mb-0 fw-semibold">
             <i class="bi bi-trophy me-2"></i>
-            Top 5 Jenis Pembayaran
+            Top 5 Jenis Tagihan
           </h6>
         </div>
         <div class="card-body p-0">

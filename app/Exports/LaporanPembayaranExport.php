@@ -33,7 +33,7 @@ class LaporanPembayaranExport implements FromCollection, WithHeadings, WithMappi
             'NIS',
             'Nama Siswa',
             'Kelas',
-            'Jenis Pembayaran',
+            'Jenis Tagihan',
             'Jumlah',
             'Metode',
         ];
@@ -50,7 +50,7 @@ class LaporanPembayaranExport implements FromCollection, WithHeadings, WithMappi
             $transaksi->siswa_nis,
             $transaksi->siswa->nama,
             $transaksi->siswa->kelas->kelas ?? '-',
-            $transaksi->tagihan->jenisPembayaran->nama ?? '-',
+            $transaksi->tagihan->jenisTagihan->nama ?? '-',
             $transaksi->jumlah_bayar,
             strtoupper($transaksi->metode),
         ];

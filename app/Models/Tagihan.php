@@ -13,8 +13,9 @@ class Tagihan extends Model
 
     protected $fillable = [
         'siswa_nis',
-        'jenis_pembayaran_id',
+        'jenis_tagihan_id',
         'kelas_id',
+        'tahun_ajaran_id',
         'total_tagihan',
         'sudah_dibayar',
         'status',
@@ -33,16 +34,22 @@ class Tagihan extends Model
         return $this->belongsTo(Siswa::class, 'siswa_nis', 'nis');
     }
 
-    public function jenisPembayaran()
+    public function jenisTagihan()
     {
-        return $this->belongsTo(JenisPembayaran::class, 'jenis_pembayaran_id');
+        return $this->belongsTo(JenisPembayaran::class, 'jenis_tagihan_id');
     }
-
+    public function tarifTagihan()
+    {
+        return $this->belongsTo(TarifTagihan::class);
+    }
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'kelas_id');
     }
-
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(TahunAjaran::class);
+    }
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class, 'tagihan_id');

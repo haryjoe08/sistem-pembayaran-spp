@@ -44,13 +44,7 @@ class ProfileController extends Controller
             'updated_at' => now(), // update() via builder tidak auto set timestamps
         ]);
 
-        /* 
-        // Opsi B: Query builder murni (juga tanpa ->save())
-        DB::table('login')->where('id', $user->id)->update([
-            'password'   => Hash::make($request->new_password),
-            'updated_at' => now(),
-        ]);
-        */
+   
 
         return back()->with('success', 'Password berhasil diubah');
     }

@@ -14,14 +14,7 @@
           </h4>
           <p class="text-muted mb-0">Daftar tagihan yang belum lunas berdasarkan bulan</p>
         </div>
-        <div>
-          <a href="{{ route('siswa.tagihan') }}" class="btn btn-outline-secondary me-2">
-            <i class="bi bi-receipt me-1"></i> Semua Tagihan
-          </a>
-          <a href="{{ route('siswa.dashboard') }}" class="btn btn-primary">
-            <i class="bi bi-house me-1"></i> Dashboard
-          </a>
-        </div>
+
       </div>
     </div>
   </div>
@@ -108,7 +101,7 @@
             <thead class="bg-light">
               <tr>
                 <th class="py-3" style="width: 5%">#</th>
-                <th class="py-3" style="width: 25%">Jenis Pembayaran</th>
+                <th class="py-3" style="width: 25%">Jenis Tagihan</th>
                 <th class="py-3 text-end" style="width: 15%">Total Tagihan</th>
                 <th class="py-3 text-end" style="width: 15%">Sudah Dibayar</th>
                 <th class="py-3 text-end" style="width: 15%">Sisa</th>
@@ -134,7 +127,7 @@
                         <i class="bi bi-receipt text-primary"></i>
                       </div>
                       <div>
-                        <div class="fw-bold">{{ $t->jenisPembayaran->nama }}</div>
+                        <div class="fw-bold">{{ $t->jenisTagihan->nama }}</div>
                         <small class="text-muted">{{ $t->created_at->format('d M Y') }}</small>
                       </div>
                     </div>

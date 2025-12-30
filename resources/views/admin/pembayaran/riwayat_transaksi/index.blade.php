@@ -186,7 +186,7 @@
               <th class="py-3">NIS</th>
               <th class="py-3">Nama Siswa</th>
               <th class="py-3">Kelas</th>
-              <th class="py-3">Jenis Pembayaran</th>
+              <th class="py-3">Jenis Tagihan</th>
               <th class="py-3">Jumlah</th>
               <th class="py-3">Metode</th>
               <th class="py-3 text-center">Aksi</th>
@@ -209,12 +209,7 @@
                 </td>
                 <td class="py-3">
                   <div class="d-flex align-items-center">
-                    <div class="avatar-sm me-2">
-                      <img src="https://ui-avatars.com/api/?name={{ urlencode($t->siswa->nama) }}&background=667eea&color=fff&size=32" 
-                           class="rounded-circle" 
-                           width="32" height="32"
-                           alt="{{ $t->siswa->nama }}">
-                    </div>
+                    
                     <span class="fw-semibold">{{ $t->siswa->nama }}</span>
                   </div>
                 </td>
@@ -222,7 +217,7 @@
                 <td class="py-3">
                   <div class="d-flex align-items-center">
                     <i class="bi bi-receipt text-primary me-2"></i>
-                    {{ $t->tagihan->jenisPembayaran->nama ?? '-' }}
+                    {{ $t->tagihan->jenisTagihan->nama ?? '-' }}
                   </div>
                 </td>
                 <td class="py-3">

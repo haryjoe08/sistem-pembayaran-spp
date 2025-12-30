@@ -36,8 +36,8 @@
           
           <div class="row mb-3">
             <div class="col-md-6">
-              <small class="text-muted d-block">Jenis Pembayaran</small>
-              <h6 class="fw-bold">{{ $tagihan->jenisPembayaran->nama }}</h6>
+              <small class="text-muted d-block">Jenis Tagihan</small>
+              <h6 class="fw-bold">{{ $tagihan->jenisTagihan->nama }}</h6>
             </div>
             <div class="col-md-6">
               <small class="text-muted d-block">Kelas</small>

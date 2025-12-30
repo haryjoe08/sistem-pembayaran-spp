@@ -21,9 +21,6 @@
                     <a href="{{ route('laporan.export.tunggakan', request()->all()) }}" class="btn btn-success">
                         <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
                     </a>
-                    <button class="btn btn-danger" onclick="window.print()">
-                        <i class="bi bi-printer me-1"></i> Print
-                    </button>
                 </div>
             </div>
         </div>
@@ -81,11 +78,11 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Jenis Pembayaran</label>
-                        <select class="form-select" name="jenis_pembayaran_id">
+                        <label class="form-label">Jenis Tagihan</label>
+                        <select class="form-select" name="jenis_tagihan_id">
                             <option value="">Semua Jenis</option>
                             @foreach($jenisPembayaranList as $jp)
-                            <option value="{{ $jp->id }}" {{ request('jenis_pembayaran_id') == $jp->id ? 'selected' : '' }}>{{ $jp->nama }}</option>
+                            <option value="{{ $jp->id }}" {{ request('jenis_tagihan_id') == $jp->id ? 'selected' : '' }}>{{ $jp->nama }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -107,7 +104,7 @@
         <div class="card-header bg-white border-bottom">
             <h6 class="mb-0 fw-semibold">
                 <i class="bi bi-list-ul me-2"></i>
-                Daftar Tunggakan Per Siswa
+                Daftar Tunggakan Per Siswa ({{ $totalSiswaMenunggak }} siswa)
             </h6>
         </div>
         <div class="card-body p-0">
@@ -127,7 +124,7 @@
                     <tbody>
                         @forelse($tunggakanPerSiswa as $index => $data)
                         <tr>
-                            <td class="px-4 py-3">{{ $loop->iteration }}</td>
+                            <td class="px-4 py-3">{{ $tunggakanPerSiswa->firstItem() + $index }}</td>
                             <td class="py-3">
                                 <span class="badge bg-secondary">{{ $data['siswa']->nis }}</span>
                             </td>
@@ -175,6 +172,20 @@
                 </table>
             </div>
         </div>
+        
+        {{-- Pagination --}}
+        @if($tunggakanPerSiswa->hasPages())
+        <div class="card-footer bg-white border-top">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    Menampilkan {{ $tunggakanPerSiswa->firstItem() }} sampai {{ $tunggakanPerSiswa->lastItem() }} dari {{ $tunggakanPerSiswa->total() }} siswa
+                </div>
+                <div>
+                    {{ $tunggakanPerSiswa->links() }}
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Alert jika ada tunggakan besar -->
@@ -189,14 +200,9 @@
 
 <style>
     @media print {
-
-        .btn,
-        .card-header,
-        nav,
-        .alert {
+        .btn, .card-header, nav, .alert {
             display: none !important;
         }
-
         .card {
             box-shadow: none !important;
             border: 1px solid #ddd !important;

@@ -30,36 +30,12 @@ class SiswaSideTagihanController extends Controller
         $tagihanAktif = $tagihans->where('status', '!=', 'lunas')->count();
         $belumLunas = $tagihans->where('status', 'belum lunas')->count();
 
-        // Tagihan terbaru (5 teratas)
-        $tagihanTerbaru = Tagihan::where('siswa_nis', $siswa->nis)
-            ->with('jenisPembayaran')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
-
-        // Tagihan yang mendekati jatuh tempo
-        $tagihanMendekatJatuhTempo = Tagihan::where('siswa_nis', $siswa->nis)
-            ->where('status', '!=', 'lunas')
-            ->whereNotNull('jatuh_tempo')
-            ->where('jatuh_tempo', '<=', now()->addDays(7))
-            ->where('jatuh_tempo', '>', now())
-            ->count();
-
-        // Pembayaran terbaru (jika ada tabel transaksi)
-        $pembayaranTerbaru = Transaksi::where('siswa_nis', $siswa->nis)
-            ->with('tagihan.jenisPembayaran')
-            ->latest()
-            ->first();
-
         return view('siswa.dashboard', compact(
             'siswa',
             'totalTunggakan',
             'sudahDibayar',
             'tagihanAktif',
             'belumLunas',
-            'tagihanTerbaru',
-            'tagihanMendekatJatuhTempo',
-            'pembayaranTerbaru'
         ));
     }
 

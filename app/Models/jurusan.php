@@ -12,6 +12,7 @@ class Jurusan extends Model
 
     protected $fillable = [
         'nama',
+        'status'
     ];
 
     // Jika jurusan berelasi dengan kelas

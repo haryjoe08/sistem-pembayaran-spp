@@ -52,4 +52,22 @@ class KelasController extends Controller
         $kela->delete();
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil dihapus.');
     }
+
+    public function nonaktif($id)
+    {
+        $kelas = Kelas::findOrFail($id);
+        $kelas->update(['status' => 'nonaktif']);
+
+        return redirect()->route('kelas.index')
+            ->with('success', 'Kelas berhasil dinonaktifkan.');
+    }
+
+    public function aktifkan($id)
+    {
+        $kelas = Kelas::findOrFail($id);
+        $kelas->update(['status' => 'aktif']);
+
+        return redirect()->route('kelas.index')
+            ->with('success', 'Kelas berhasil diaktifkan kembali.');
+    }
 }

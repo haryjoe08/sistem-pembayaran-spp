@@ -1,271 +1,354 @@
 @extends('layouts.adminMaster')
 
 @section('content')
-<div class="container">
-    <h4 class="my-3">Daftar Tagihan Aktif</h4>
-    <a href="{{ route('tagihan.create') }}" class="btn btn-primary mb-3">+ Tambah Tagihan</a>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>No</th>
-                    <th>NIS</th>
-                    <th>Siswa</th>
-                    <th>Kelas</th>
-                    <th>Jenis Pembayaran</th>
-                    <th>Total Tagihan</th>
-                    <th>Sudah Dibayar</th>
-                    <th>Sisa Tagihan</th>
-                    <th>Jatuh Tempo</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($data as $d)
-                <tr>
-                    <td>{{ ($data->currentPage()-1) * $data->perPage() + $loop->iteration }}</td>
-                    <td>{{ $d->siswa_nis }}</td>
-                    <td>{{ $d->siswa->nama ?? '-' }} </td>
-                    <td>{{ $d->siswa->kelas?->kelas ?? '-' }}</td>
-                    <td>{{ $d->jenisPembayaran->nama ?? '-' }}</td>
-                    <td>Rp {{ number_format($d->total_tagihan,0,',','.') }}</td>
-                    <td>Rp {{ number_format($d->sudah_dibayar,0,',','.') }}</td>
-                    <td>
-                        <span class="text-danger fw-bold">
-                            Rp {{ number_format($d->total_tagihan - $d->sudah_dibayar,0,',','.') }}
-                        </span>
-                    </td>
-                    <td>{{ \Carbon\Carbon::parse($d->jatuh_tempo)->translatedFormat('d F Y') }}</td>
+<div class="container-fluid p-4">
+   <!-- SUCCESS MESSAGE -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
-                    <td>
-                        <a href="{{ route('tagihan.edit', $d->id) }}" class="btn btn-sm btn-warning">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        <form action="{{ route('tagihan.destroy', $d->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus data ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger" type="submit">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="9" class="text-center">Tidak ada tagihan yang belum lunas.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    {{ $data->links() }}
-</div>
+    <!-- ERROR MESSAGE -->
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
-
-@if(session('tagihan_stats'))
-  @php
-    $stats = session('tagihan_stats');
-  @endphp
-
-  <!-- Statistics Alert -->
+    <!-- Atau tampilkan semua errors dari validation -->
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> <strong>Terjadi kesalahan:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+  <!-- Header -->
   <div class="row mb-4">
     <div class="col-12">
-      
-      <!-- Summary Cards -->
-      <div class="row mb-3">
-        @if($stats['created'] > 0)
-        <div class="col-md-4">
-          <div class="alert alert-success border-0 shadow-sm mb-0">
-            <div class="d-flex align-items-center">
-              <div class="rounded-circle bg-success bg-opacity-25 p-3 me-3">
-                <i class="bi bi-check-circle-fill fs-3 text-success"></i>
-              </div>
-              <div>
-                <h4 class="fw-bold mb-0">{{ $stats['created'] }}</h4>
-                <small class="text-muted">Tagihan Berhasil Dibuat</small>
-              </div>
-            </div>
-          </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h4 class="fw-bold text-dark mb-1">
+            <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+            Daftar Tagihan
+          </h4>
+          <p class="text-muted mb-0">Kelola tagihan pembayaran siswa</p>
         </div>
-        @endif
-
-        @if($stats['blocked'] > 0)
-        <div class="col-md-4">
-          <div class="alert alert-warning border-0 shadow-sm mb-0">
-            <div class="d-flex align-items-center">
-              <div class="rounded-circle bg-warning bg-opacity-25 p-3 me-3">
-                <i class="bi bi-exclamation-triangle-fill fs-3 text-warning"></i>
-              </div>
-              <div>
-                <h4 class="fw-bold mb-0">{{ $stats['blocked'] }}</h4>
-                <small class="text-muted">Siswa Diblokir</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        @endif
-
-        @if($stats['skipped'] > 0)
-        <div class="col-md-4">
-          <div class="alert alert-info border-0 shadow-sm mb-0">
-            <div class="d-flex align-items-center">
-              <div class="rounded-circle bg-info bg-opacity-25 p-3 me-3">
-                <i class="bi bi-info-circle-fill fs-3 text-info"></i>
-              </div>
-              <div>
-                <h4 class="fw-bold mb-0">{{ $stats['skipped'] }}</h4>
-                <small class="text-muted">Siswa Dilewati</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        @endif
+        <a href="{{ route('tagihan.create') }}" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i> Tambah Tagihan
+        </a>
       </div>
-
-      <!-- Blocked Details (Expandable) -->
-      @if($stats['blocked'] > 0 && count($stats['blocked_details']) > 0)
-      <div class="card border-0 shadow-sm border-warning border-2">
-        <div class="card-header bg-warning bg-opacity-10">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 fw-bold text-warning">
-              <i class="bi bi-exclamation-triangle-fill me-2"></i>
-              Siswa yang Diblokir ({{ count($stats['blocked_details']) }})
-            </h6>
-            <button class="btn btn-sm btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#blockedDetails">
-              <i class="bi bi-chevron-down"></i> Lihat Detail
-            </button>
-          </div>
-        </div>
-        <div class="collapse" id="blockedDetails">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th style="width: 5%">#</th>
-                    <th style="width: 15%">NIS</th>
-                    <th style="width: 30%">Nama Siswa</th>
-                    <th style="width: 20%">Jatuh Tempo Tagihan Aktif</th>
-                    <th style="width: 20%">Sisa Tagihan</th>
-                    <th style="width: 10%">Alasan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach($stats['blocked_details'] as $index => $detail)
-                  <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td><code>{{ $detail['nis'] }}</code></td>
-                    <td>{{ $detail['siswa'] }}</td>
-                    <td>
-                      <span class="badge bg-warning text-dark">
-                        <i class="bi bi-calendar-x me-1"></i>
-                        {{ $detail['existing_jatuh_tempo'] }}
-                      </span>
-                    </td>
-                    <td>
-                      <strong class="text-danger">
-                        Rp {{ number_format($detail['sisa'], 0, ',', '.') }}
-                      </strong>
-                    </td>
-                    <td>
-                      <small class="text-muted">Tagihan aktif belum lunas</small>
-                    </td>
-                  </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-            <div class="card-footer bg-warning bg-opacity-10">
-              <div class="d-flex align-items-start">
-                <i class="bi bi-info-circle me-2 text-warning"></i>
-                <small class="text-muted">
-                  <strong>Catatan:</strong> Siswa ini tidak dapat dibuat tagihan baru karena masih memiliki tagihan yang belum lunas dan belum melewati jatuh tempo. Tagihan baru dapat dibuat setelah tagihan lama dilunasi atau jatuh tempo terlewati.
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      @endif
-
-      <!-- Skipped Details (Expandable) -->
-      @if($stats['skipped'] > 0 && count($stats['skipped_details']) > 0)
-      <div class="card border-0 shadow-sm border-info border-2 mt-3">
-        <div class="card-header bg-info bg-opacity-10">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 fw-bold text-info">
-              <i class="bi bi-info-circle-fill me-2"></i>
-              Siswa yang Dilewati ({{ count($stats['skipped_details']) }})
-            </h6>
-            <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#skippedDetails">
-              <i class="bi bi-chevron-down"></i> Lihat Detail
-            </button>
-          </div>
-        </div>
-        <div class="collapse" id="skippedDetails">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th style="width: 10%">#</th>
-                    <th style="width: 20%">NIS</th>
-                    <th style="width: 40%">Nama Siswa</th>
-                    <th style="width: 30%">Alasan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach($stats['skipped_details'] as $index => $detail)
-                  <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td><code>{{ $detail['nis'] }}</code></td>
-                    <td>{{ $detail['siswa'] }}</td>
-                    <td>
-                      <span class="badge bg-info">
-                        {{ $detail['reason'] }}
-                      </span>
-                    </td>
-                  </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-      @endif
-
     </div>
   </div>
-@endif
 
-<script>
-// Auto-collapse after 10 seconds
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    const alerts = document.querySelectorAll('.alert-success, .alert-warning, .alert-info');
-    alerts.forEach(alert => {
-      if (alert.querySelector('.fs-3')) { // Only summary cards
-        alert.style.transition = 'opacity 0.5s';
-        alert.style.opacity = '0';
-        setTimeout(() => alert.remove(), 500);
-      }
-    });
-  }, 10000);
-});
-</script>
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-primary text-white">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="mb-1 small">Total Tagihan</p>
+              <h4 class="mb-0">{{ \App\Models\Tagihan::count() }}</h4>
+            </div>
+            <i class="bi bi-files fs-1 opacity-25"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-danger text-white">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="mb-1 small">Belum Lunas</p>
+              <h4 class="mb-0">{{ \App\Models\Tagihan::where('status', 'belum lunas')->count() }}</h4>
+            </div>
+            <i class="bi bi-exclamation-circle fs-1 opacity-25"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-success text-white">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="mb-1 small">Lunas</p>
+              <h4 class="mb-0">{{ \App\Models\Tagihan::where('status', 'lunas')->count() }}</h4>
+            </div>
+            <i class="bi bi-check-circle fs-1 opacity-25"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-warning text-white">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="mb-1 small">Total Tunggakan</p>
+              <h4 class="mb-0">Rp {{ number_format(\App\Models\Tagihan::where('status', 'belum lunas')->sum('total_tagihan') - \App\Models\Tagihan::where('status', 'belum lunas')->sum('sudah_dibayar'), 0, ',', '.') }}</h4>
+            </div>
+            <i class="bi bi-cash-stack fs-1 opacity-25"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<style>
-.border-2 {
-  border-width: 2px !important;
-}
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+      <form action="{{ route('tagihan.index') }}" method="GET">
+        <div class="row g-3 align-items-end">
+          
+          <!-- Filter Status -->
+          <div class="col-md-2">
+            <label class="form-label small text-muted fw-bold">Status</label>
+            <select class="form-select" name="status">
+              <option value="belum lunas" {{ request('status', 'belum lunas') === 'belum lunas' ? 'selected' : '' }}>
+                Belum Lunas
+              </option>
+              <option value="lunas" {{ request('status') === 'lunas' ? 'selected' : '' }}>
+                Lunas
+              </option>
+              <option value="semua" {{ request('status') === 'semua' ? 'selected' : '' }}>
+                Semua Status
+              </option>
+            </select>
+          </div>
 
-.table code {
-  background: #f8f9fa;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 0.9em;
-}
-</style>
+          <!-- Filter Tahun Ajaran -->
+          <div class="col-md-3">
+            <label class="form-label small text-muted fw-bold">Tahun Ajaran</label>
+            <select class="form-select" name="tahun_ajaran_id">
+              <option value="">Semua Tahun Ajaran</option>
+              @foreach($tahunAjaran as $ta)
+                <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id') == $ta->id ? 'selected' : '' }}>
+                  {{ $ta->tahun}}
+                  @if($ta->status === 'aktif') (Aktif) @endif
+                </option>
+              @endforeach
+            </select>
+          </div>
+
+          <!-- Filter Jenis Tagihan -->
+          <div class="col-md-3">
+            <label class="form-label small text-muted fw-bold">Jenis Tagihan</label>
+            <select class="form-select" name="jenis_tagihan_id">
+              <option value="">Semua Jenis</option>
+              @foreach($jenisTagihan as $jt)
+                <option value="{{ $jt->id }}" {{ request('jenis_tagihan_id') == $jt->id ? 'selected' : '' }}>
+                  {{ $jt->nama}}
+                </option>
+              @endforeach
+            </select>
+          </div>
+
+          <!-- Filter Kelas -->
+          <div class="col-md-2">
+            <label class="form-label small text-muted fw-bold">Kelas</label>
+            <select class="form-select" name="kelas_id">
+              <option value="">Semua Kelas</option>
+              @foreach($kelas as $k)
+                <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
+                  {{ $k->kelas }}
+                </option>
+              @endforeach
+            </select>
+          </div>
+
+          <!-- Search -->
+          <div class="col-md-3">
+            <label class="form-label small text-muted fw-bold">Cari Siswa</label>
+            <input type="text" 
+                   class="form-control" 
+                   name="search" 
+                   placeholder="NIS atau Nama..."
+                   value="{{ request('search') }}">
+          </div>
+
+          <!-- Buttons -->
+          <div class="col-md-2">
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary flex-fill">
+                <i class="bi bi-search"></i>
+              </button>
+              <a href="{{ route('tagihan.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-clockwise"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Active Filter Badge -->
+  @if(request()->hasAny(['status', 'tahun_ajaran_id', 'kelas_id', 'search']))
+  <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <i class="bi bi-funnel me-2"></i>
+      <strong>Filter Aktif:</strong>
+      @if(request('status') && request('status') !== 'belum lunas')
+        <span class="badge bg-primary ms-1">Status: {{ ucfirst(str_replace('_', ' ', request('status'))) }}</span>
+      @endif
+      @if(request('tahun_ajaran_id'))
+        <span class="badge bg-primary ms-1">
+          Tahun: {{ \App\Models\TahunAjaran::find(request('tahun_ajaran_id'))->tahun ?? '-' }}
+        </span>
+      @endif
+      @if(request('jenis_pembayaran_id'))
+        <span class="badge bg-primary ms-1">
+          Jenis Tagihan: {{ \App\Models\JenisPembayaran::find(request('jenis_pembayaran_id'))->nama ?? '-' }}
+        </span>
+      @endif
+      @if(request('kelas_id'))
+        <span class="badge bg-primary ms-1">
+          Kelas: {{ \App\Models\Kelas::find(request('kelas_id'))->kelas ?? '-' }}
+        </span>
+      @endif
+      @if(request('search'))
+        <span class="badge bg-primary ms-1">Search: {{ request('search') }}</span>
+      @endif
+    </div>
+    <a href="{{ route('tagihan.index') }}" class="btn btn-sm btn-outline-danger">
+      <i class="bi bi-x-circle"></i> Clear
+    </a>
+  </div>
+  @endif
+
+  <!-- Table -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      @if($data->count() > 0)
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th width="50">#</th>
+              <th>Siswa</th>
+              <th width="120">Kelas</th>
+              <th width="150">Tahun Ajaran</th>
+              <th>Jenis Tagihan</th>
+              <th width="130">Total</th>
+              <th width="130">Dibayar</th>
+              <th width="130">Sisa</th>
+              <th width="120">Jatuh Tempo</th>
+              <th width="100">Status</th>
+              <th width="150" class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($data as $d)
+            <tr>
+              <td>{{ $data->firstItem() + $loop->index }}</td>
+              <td>
+                <strong>{{ $d->siswa->nama ?? '-' }}</strong>
+                <br>
+                <small class="text-muted">NIS: {{ $d->siswa_nis }}</small>
+              </td>
+              <td>{{ $d->siswa->kelas?->kelas ?? '-' }}</td>
+              <td>
+                <span class="badge bg-info">
+                  {{ $d->tahunAjaran->tahun ?? '-' }}
+                </span>
+              </td>
+              <td>
+                {{ $d->jenisTagihan->nama ?? '-' }}
+                @if($d->jenisTagihan)
+                  <br>
+                  <small class="text-muted">({{ ucfirst($d->jenisTagihan->tipe ?? 'bulanan') }})</small>
+                @endif
+              </td>
+              <td>
+                <strong>Rp {{ number_format($d->total_tagihan, 0, ',', '.') }}</strong>
+              </td>
+              <td>
+                <span class="text-success">Rp {{ number_format($d->sudah_dibayar, 0, ',', '.') }}</span>
+              </td>
+              <td>
+                @php
+                  $sisa = $d->total_tagihan - $d->sudah_dibayar;
+                @endphp
+                <strong class="{{ $sisa > 0 ? 'text-danger' : 'text-success' }}">
+                  Rp {{ number_format($sisa, 0, ',', '.') }}
+                </strong>
+              </td>
+              <td>
+                @php
+                  $jatuhTempo = \Carbon\Carbon::parse($d->jatuh_tempo);
+                  $isLewat = $jatuhTempo->isPast() && $d->status !== 'lunas';
+                @endphp
+                <small class="{{ $isLewat ? 'text-danger fw-bold' : '' }}">
+                  {{ $jatuhTempo->translatedFormat('d M Y') }}
+                  @if($isLewat)
+                    <br><span class="badge bg-danger">Lewat JT</span>
+                  @endif
+                </small>
+              </td>
+              <td>
+                @if($d->status === 'lunas')
+                  <span class="badge bg-success">Lunas</span>
+                @else
+                  <span class="badge bg-danger">Belum Lunas</span>
+                @endif
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm">
+                  <a href="{{ route('tagihan.edit', $d->id) }}" 
+                     class="btn btn-warning" 
+                     title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form action="{{ route('tagihan.destroy', $d->id) }}" 
+                        method="POST" 
+                        class="d-inline"
+                        onsubmit="return confirm('Yakin hapus tagihan ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger" title="Hapus">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-center mt-3 mb-3">
+        {{ $data->appends(request()->except('page'))->links() }}
+      </div>
+      @else
+      <div class="text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <p class="text-muted mt-3">Tidak ada tagihan ditemukan</p>
+        @if(request()->hasAny(['status', 'tahun_ajaran_id', 'kelas_id', 'search']))
+          <a href="{{ route('tagihan.index') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-clockwise me-1"></i> Reset Filter
+          </a>
+        @else
+          <a href="{{ route('tagihan.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Buat Tagihan Pertama
+          </a>
+        @endif
+      </div>
+      @endif
+    </div>
+  </div>
+
+</div>
 @endsection

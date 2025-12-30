@@ -13,7 +13,7 @@ class TransaksiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Transaksi::with(['siswa.kelas', 'tagihan.jenisPembayaran']);
+        $query = Transaksi::with(['siswa.kelas', 'tagihan.jenisTagihan']);
 
         // Filter by date range
         if ($request->filled('dari_tanggal')) {
@@ -70,7 +70,7 @@ class TransaksiController extends Controller
      */
     public function show(Transaksi $transaksi)
     {
-        $transaksi->load(['siswa.kelas', 'tagihan.jenisPembayaran']);
+        $transaksi->load(['siswa.kelas', 'tagihan.jenisTagihan']);
         
         return view('admin.pembayaran.riwayat_transaksi.show', compact('transaksi'));
     }
@@ -80,7 +80,7 @@ class TransaksiController extends Controller
      */
     public function printKwitansi(Transaksi $transaksi)
     {
-        $transaksi->load(['siswa.kelas', 'tagihan.jenisPembayaran']);
+        $transaksi->load(['siswa.kelas', 'tagihan.jenisTagihan']);
         
         return view('admin.pembayaran.riwayat_transaksi.kwitansi-print', compact('transaksi'));
     }

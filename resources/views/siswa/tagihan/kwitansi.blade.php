@@ -323,7 +323,7 @@
             <div class="payment-details">
                 <div class="detail-row">
                     <span>Untuk Pembayaran</span>
-                    <strong>{{ $transaksi->tagihan->jenisPembayaran->nama ?? '-' }}</strong>
+                    <strong>{{ $transaksi->tagihan->jenisTagihan->nama ?? '-' }}</strong>
                 </div>
                 <div class="detail-row">
                     <span>Tanggal Transaksi</span>

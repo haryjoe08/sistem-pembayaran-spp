@@ -80,8 +80,8 @@
 
           <div class="row mb-3">
             <div class="col-12">
-              <small class="text-muted d-block">Jenis Pembayaran</small>
-              <p class="fw-bold mb-0">{{ $paymentOrder->tagihan->jenisPembayaran->nama }}</p>
+              <small class="text-muted d-block">Jenis Tagihan</small>
+              <p class="fw-bold mb-0">{{ $paymentOrder->tagihan->jenisTagihan->nama }}</p>
             </div>
           </div>
 

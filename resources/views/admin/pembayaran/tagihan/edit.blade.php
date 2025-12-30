@@ -73,21 +73,21 @@
             @enderror
           </div>
 
-          <!-- JENIS PEMBAYARAN -->
+          <!-- JENIS TAGIHAN -->
           <div class="mb-3">
-            <label for="jenis_pembayaran_id" class="form-label">Jenis Pembayaran <span class="text-danger">*</span></label>
-            <select class="form-select @error('jenis_pembayaran_id') is-invalid @enderror"
-              id="jenis_pembayaran_id" name="jenis_pembayaran_id" required>
-              <option value="">-- Pilih Jenis Pembayaran --</option>
-              @foreach($jenisPembayaran as $jp)
+            <label for="jenis_tagihan_id" class="form-label">Jenis Tagihan <span class="text-danger">*</span></label>
+            <select class="form-select @error('jenis_tagihan_id') is-invalid @enderror"
+              id="jenis_tagihan_id" name="jenis_tagihan_id" required>
+              <option value="">-- Pilih Jenis Tagihan --</option>
+              @foreach($jenisTagihan as $jp)
                 <option value="{{ $jp->id }}" 
                   data-nominal="{{ $jp->nominal }}"
-                  {{ (old('jenis_pembayaran_id') ?? $tagihan->jenis_pembayaran_id) == $jp->id ? 'selected' : '' }}>
+                  {{ (old('jenis_tagihan_id') ?? $tagihan->jenis_tagihan_id) == $jp->id ? 'selected' : '' }}>
                   {{ $jp->nama }} (Rp{{ number_format($jp->nominal, 0, ',', '.') }})
                 </option>
               @endforeach
             </select>
-            @error('jenis_pembayaran_id')
+            @error('jenis_tagihan_id')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
           </div>
@@ -125,7 +125,7 @@
                 value="{{ old('total_tagihan') ?? $tagihan->total_tagihan }}" 
                 readonly>
             </div>
-            <div class="form-text">Otomatis mengikuti jenis pembayaran yang dipilih</div>
+            <div class="form-text">Otomatis mengikuti Jenis Tagihan yang dipilih</div>
           </div>
         </div>
 
@@ -194,7 +194,7 @@
       <!-- WARNING -->
       <div class="alert alert-info" role="alert">
         <i class="fas fa-info-circle"></i> 
-        <strong>Informasi:</strong> Form ini untuk mengubah jenis pembayaran dan jatuh tempo tagihan. Untuk mencatat pembayaran dari siswa, gunakan menu "Terima Pembayaran".
+        <strong>Informasi:</strong> Form ini untuk mengubah Jenis Tagihan dan jatuh tempo tagihan. Untuk mencatat pembayaran dari siswa, gunakan menu "Terima Pembayaran".
       </div>
     </div>
 
@@ -210,8 +210,8 @@
 </div>
 
 <script>
-  // Auto update total tagihan berdasarkan jenis pembayaran
-  document.getElementById('jenis_pembayaran_id').addEventListener('change', function () {
+  // Auto update total tagihan berdasarkan Jenis Tagihan
+  document.getElementById('jenis_tagihan_id').addEventListener('change', function () {
     const selected = this.options[this.selectedIndex];
     const nominal = selected.getAttribute('data-nominal');
     
@@ -284,7 +284,7 @@
   document.querySelector('form').addEventListener('submit', function(e) {
     const siswaSelect = document.getElementById('siswa_nis');
     const siswaText = siswaSelect.options[siswaSelect.selectedIndex].text;
-    const jenisSelect = document.getElementById('jenis_pembayaran_id');
+    const jenisSelect = document.getElementById('jenis_tagihan_id');
     const jenisText = jenisSelect.options[jenisSelect.selectedIndex].text;
     const jatuhTempo = document.getElementById('jatuh_tempo').value;
     

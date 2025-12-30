@@ -338,43 +338,6 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="card mb-3 mb-md-4">
-        <div class="card-body p-3 p-md-4">
-            <h6 class="section-title">Aksi Cepat</h6>
-            <div class="row g-2 g-md-3">
-                <div class="col-6 col-md-3">
-                    <a href="=" class="action-btn btn btn-primary w-100 d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
-                        <i class="fas fa-list"></i>
-                        <span class="d-none d-sm-inline">Lihat Semua Tagihan</span>
-                        <span class="d-sm-none small">Tagihan</span>
-                    </a>
-                </div>
-                <div class="col-6 col-md-3">
-                    <a href="=" class="action-btn btn btn-success w-100 d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
-                        <i class="fas fa-history"></i>
-                        <span class="d-none d-sm-inline">History Pembayaran</span>
-                        <span class="d-sm-none small">History</span>
-                    </a>
-                </div>
-                <div class="col-6 col-md-3">
-                    <a href="" class="action-btn btn btn-info w-100 d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
-                        <i class="fas fa-download"></i>
-                        <span class="d-none d-sm-inline">Download Kwitansi</span>
-                        <span class="d-sm-none small">Kwitansi</span>
-                    </a>
-                </div>
-                <div class="col-6 col-md-3">
-                    <a href="" class="action-btn btn btn-secondary w-100 d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
-                        <i class="fas fa-phone"></i>
-                        <span class="d-none d-sm-inline">Hubungi Admin</span>
-                        <span class="d-sm-none small">Admin</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="row">
         <!-- Tagihan Terbaru -->
@@ -383,25 +346,24 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h6 class="section-title mb-0">Tagihan Terbaru</h6>
-                        <a href="" class="btn btn-outline-primary btn-sm">Lihat Semua <i class="fas fa-arrow-right ms-1"></i></a>
+                        <a href="{{ route('siswa.tagihan') }}" class="btn btn-outline-primary btn-sm">Lihat Semua <i class="fas fa-arrow-right ms-1"></i></a>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-modern">
                             <thead>
                                 <tr>
-                                    <th>Jenis Pembayaran</th>
+                                    <th>Jenis Tagihan</th>
                                     <th>Total</th>
                                     <th>Sudah Bayar</th>
                                     <th>Sisa</th>
                                     <th>Status</th>
-                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($tagihanTerbaru as $tagihan)
                                 <tr>
                                     <td>
-                                        <strong>{{ $tagihan->jenisPembayaran->nama ?? '-' }}</strong>
+                                        <strong>{{ $tagihan->jenisTagihan->nama ?? '-' }}</strong>
                                     </td>
                                     <td>Rp {{ number_format($tagihan->total_tagihan, 0, ',', '.') }}</td>
                                     <td class="text-success">Rp {{ number_format($tagihan->sudah_dibayar, 0, ',', '.') }}</td>
@@ -410,17 +372,6 @@
                                         <span class="badge-status {{ $tagihan->status == 'lunas' ? 'bg-success' : 'bg-warning text-dark' }}">
                                             {{ ucfirst($tagihan->status) }}
                                         </span>
-                                    </td>
-                                    <td>
-                                        @if($tagihan->status != 'lunas')
-                                        <a href="" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-credit-card me-1"></i>Bayar
-                                        </a>
-                                        @else
-                                        <a href="" class="btn btn-sm btn-outline-info">
-                                            <i class="fas fa-receipt me-1"></i>Kwitansi
-                                        </a>
-                                        @endif
                                     </td>
                                 </tr>
                                 @empty
@@ -461,31 +412,10 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <a href="" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-user-edit me-2"></i>Edit Profil
-                    </a>
                 </div>
             </div>
 
-            <!-- Informasi Kontak -->
-            <div class="card">
-                <div class="card-body p-4">
-                    <h6 class="section-title">Butuh Bantuan?</h6>
-                    <div class="info-box">
-                        <i class="fas fa-headset fa-3x mb-3" style="color: #667eea;"></i>
-                        <p class="text-muted small mb-3">Hubungi bagian Tata Usaha untuk informasi lebih lanjut</p>
-                        <div class="d-grid gap-2">
-                            <a href="tel:0271123456" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-phone me-2"></i>0271-123456
-                            </a>
-                            <a href="mailto:admin@man-example.sch.id" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-envelope me-2"></i>admin@man-example.sch.id
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+         
         </div>
     </div>
 </div>

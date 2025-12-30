@@ -6,12 +6,12 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanPembayaranExport;
 use App\Exports\LaporanTunggakanExport;
 use App\Exports\LaporanPerKelasExport;
-
+use App\Models\JenisPembayaran;
 use App\Models\Transaksi;
 use App\Models\Tagihan;
 use App\Models\Siswa;
 use App\Models\Kelas;
-use App\Models\JenisPembayaran;
+use App\Models\JenisTagihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -41,10 +41,10 @@ class LaporanController extends Controller
                                     ->get();
 
         // Top 5 Jenis Pembayaran
-        $topJenisPembayaran = Transaksi::select('jenis_pembayaran.nama', DB::raw('COUNT(*) as jumlah_transaksi'), DB::raw('SUM(transaksi.jumlah_bayar) as total_nominal'))
+        $topJenisPembayaran = Transaksi::select('jenis_tagihan.nama', DB::raw('COUNT(*) as jumlah_transaksi'), DB::raw('SUM(transaksi.jumlah_bayar) as total_nominal'))
                                       ->join('tagihan', 'transaksi.tagihan_id', '=', 'tagihan.id')
-                                      ->join('jenis_pembayaran', 'tagihan.jenis_pembayaran_id', '=', 'jenis_pembayaran.id')
-                                      ->groupBy('jenis_pembayaran.id', 'jenis_pembayaran.nama')
+                                      ->join('jenis_tagihan', 'tagihan.jenis_tagihan_id', '=', 'jenis_tagihan.id')
+                                      ->groupBy('jenis_tagihan.id', 'jenis_tagihan.nama')
                                       ->orderBy('total_nominal', 'desc')
                                       ->limit(5)
                                       ->get();
@@ -60,11 +60,11 @@ class LaporanController extends Controller
     }
 
     /**
-     * Laporan Pembayaran
+     * Laporan Pembayaran (dengan Pagination)
      */
     public function pembayaran(Request $request)
     {
-        $query = Transaksi::with(['siswa.kelas', 'tagihan.jenisPembayaran']);
+        $query = Transaksi::with(['siswa.kelas', 'tagihan.jenisTagihan']);
 
         // Default bulan ini jika tidak ada filter
         $dariTanggal = $request->dari_tanggal ?? now()->startOfMonth()->format('Y-m-d');
@@ -80,9 +80,9 @@ class LaporanController extends Controller
         }
 
         // Filter by jenis pembayaran
-        if ($request->filled('jenis_pembayaran_id')) {
+        if ($request->filled('jenis_tagihan_id')) {
             $query->whereHas('tagihan', function($q) use ($request) {
-                $q->where('jenis_pembayaran_id', $request->jenis_pembayaran_id);
+                $q->where('jenis_tagihan_id', $request->jenis_tagihan_id);
             });
         }
 
@@ -91,17 +91,22 @@ class LaporanController extends Controller
             $query->where('metode', $request->metode);
         }
 
-        $transaksi = $query->orderBy('tanggal', 'desc')->get();
-
-        // Summary
-        $totalTransaksi = $transaksi->count();
-        $totalNominal = $transaksi->sum('jumlah_bayar');
-        $groupByMetode = $transaksi->groupBy('metode')->map(function($items) {
+        // Clone query untuk summary sebelum pagination
+        $summaryQuery = clone $query;
+        
+        // Summary - hitung dari semua data tanpa pagination
+        $allTransaksi = $summaryQuery->get();
+        $totalTransaksi = $allTransaksi->count();
+        $totalNominal = $allTransaksi->sum('jumlah_bayar');
+        $groupByMetode = $allTransaksi->groupBy('metode')->map(function($items) {
             return [
                 'jumlah' => $items->count(),
                 'total' => $items->sum('jumlah_bayar')
             ];
         });
+
+        // Pagination - 20 data per halaman
+        $transaksi = $query->orderBy('tanggal', 'desc')->paginate(20)->withQueryString();
 
         // Data untuk filter
         $kelasList = Kelas::orderBy('kelas')->get();
@@ -120,11 +125,11 @@ class LaporanController extends Controller
     }
 
     /**
-     * Laporan Tunggakan
+     * Laporan Tunggakan (dengan Pagination)
      */
     public function tunggakan(Request $request)
     {
-        $query = Tagihan::with(['siswa.kelas', 'jenisPembayaran'])
+        $query = Tagihan::with(['siswa.kelas', 'jenisTagihan'])
                        ->where('status', 'belum lunas');
 
         // Filter by kelas
@@ -133,14 +138,14 @@ class LaporanController extends Controller
         }
 
         // Filter by jenis pembayaran
-        if ($request->filled('jenis_pembayaran_id')) {
-            $query->where('jenis_pembayaran_id', $request->jenis_pembayaran_id);
+        if ($request->filled('jenis_tagihan_id')) {
+            $query->where('jenis_tagihan_id', $request->jenis_tagihan_id);
         }
 
         $tagihan = $query->orderBy('created_at', 'desc')->get();
 
         // Calculate tunggakan per siswa
-        $tunggakanPerSiswa = $tagihan->groupBy('siswa_nis')->map(function($items) {
+        $tunggakanCollection = $tagihan->groupBy('siswa_nis')->map(function($items) {
             return [
                 'siswa' => $items->first()->siswa,
                 'jumlah_tagihan' => $items->count(),
@@ -148,14 +153,27 @@ class LaporanController extends Controller
                     return $item->total_tagihan - $item->sudah_dibayar;
                 })
             ];
-        })->sortByDesc('total_tunggakan');
+        })->sortByDesc('total_tunggakan')->values();
+
+        // Manual pagination untuk collection
+        $perPage = 20;
+        $currentPage = $request->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        
+        $tunggakanPerSiswa = new \Illuminate\Pagination\LengthAwarePaginator(
+            $tunggakanCollection->slice($offset, $perPage)->values(),
+            $tunggakanCollection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         // Summary
         $totalTagihanBelumLunas = $tagihan->count();
         $totalTunggakan = $tagihan->sum(function($item) {
             return $item->total_tagihan - $item->sudah_dibayar;
         });
-        $totalSiswaMenunggak = $tunggakanPerSiswa->count();
+        $totalSiswaMenunggak = $tunggakanCollection->count();
 
         // Data untuk filter
         $kelasList = Kelas::orderBy('kelas')->get();
@@ -172,15 +190,15 @@ class LaporanController extends Controller
     }
 
     /**
-     * Laporan Per Kelas
+     * Laporan Per Kelas (dengan Pagination)
      */
     public function perKelas(Request $request)
     {
-        $kelasList = Kelas::with(['siswa.tagihan.jenisPembayaran'])
+        $kelasList = Kelas::with(['siswa.tagihan.jenisTagihan'])
                          ->orderBy('kelas')
                          ->get();
 
-        $laporanKelas = $kelasList->map(function($kelas) {
+        $laporanKelasCollection = $kelasList->map(function($kelas) {
             $siswas = $kelas->siswa;
             $tagihans = $siswas->flatMap->tagihan;
 
@@ -198,6 +216,19 @@ class LaporanController extends Controller
             ];
         });
 
+        // Manual pagination untuk collection
+        $perPage = 10;
+        $currentPage = $request->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        
+        $laporanKelas = new \Illuminate\Pagination\LengthAwarePaginator(
+            $laporanKelasCollection->slice($offset, $perPage)->values(),
+            $laporanKelasCollection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         return view('admin.laporan.per-kelas', compact('laporanKelas'));
     }
 
@@ -206,7 +237,7 @@ class LaporanController extends Controller
      */
     public function exportPembayaran(Request $request)
     {
-        $query = Transaksi::with(['siswa.kelas', 'tagihan.jenisPembayaran']);
+        $query = Transaksi::with(['siswa.kelas', 'tagihan.jenisTagihan']);
 
         $dariTanggal = $request->dari_tanggal ?? now()->startOfMonth()->format('Y-m-d');
         $sampaiTanggal = $request->sampai_tanggal ?? now()->endOfMonth()->format('Y-m-d');
@@ -219,9 +250,9 @@ class LaporanController extends Controller
             });
         }
 
-        if ($request->filled('jenis_pembayaran_id')) {
+        if ($request->filled('jenis_tagihan_id')) {
             $query->whereHas('tagihan', function($q) use ($request) {
-                $q->where('jenis_pembayaran_id', $request->jenis_pembayaran_id);
+                $q->where('jenis_tagihan_id', $request->jenis_tagihan_id);
             });
         }
 
@@ -242,15 +273,15 @@ class LaporanController extends Controller
      */
     public function exportTunggakan(Request $request)
     {
-        $query = Tagihan::with(['siswa.kelas', 'jenisPembayaran'])
+        $query = Tagihan::with(['siswa.kelas', 'jenisTagihan'])
                        ->where('status', 'belum lunas');
 
         if ($request->filled('kelas_id')) {
             $query->where('kelas_id', $request->kelas_id);
         }
 
-        if ($request->filled('jenis_pembayaran_id')) {
-            $query->where('jenis_pembayaran_id', $request->jenis_pembayaran_id);
+        if ($request->filled('jenis_tagihan_id')) {
+            $query->where('jenis_tagihan_id', $request->jenis_tagihan_id);
         }
 
         $tagihan = $query->orderBy('created_at', 'desc')->get();
@@ -275,7 +306,7 @@ class LaporanController extends Controller
      */
     public function exportPerKelas(Request $request)
     {
-        $kelasList = Kelas::with(['siswa.tagihan.jenisPembayaran'])
+        $kelasList = Kelas::with(['siswa.tagihan.jenisTagihan'])
                          ->orderBy('kelas')
                          ->get();
 
