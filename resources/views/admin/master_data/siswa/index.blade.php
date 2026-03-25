@@ -33,13 +33,15 @@
                   <i class="bi bi-mortarboard me-2"></i> Export Siswa Lulus
                 </a>
               </li>
-              @if(request('kelas_id'))
+
+              <!-- Export berdasarkan filter yang aktif -->
+              @if(request()->hasAny(['kelas', 'jurusan', 'status', 'search']))
               <li>
                 <hr class="dropdown-divider">
               </li>
               <li>
-                <a class="dropdown-item" href="{{ route('siswa.export', array_merge(request()->all(), ['status' => request('status', 'aktif')])) }}">
-                  <i class="bi bi-funnel me-2"></i> Export Filter Aktif
+                <a class="dropdown-item" href="{{ route('siswa.export', request()->only(['kelas', 'jurusan', 'status', 'search'])) }}">
+                  <i class="bi bi-funnel me-2"></i> Export Sesuai Filter Aktif
                 </a>
               </li>
               @endif
@@ -137,6 +139,9 @@
               </option>
               <option value="tidak_aktif" {{ request('status') == 'tidak_aktif' ? 'selected' : '' }}>
                 Tidak Aktif
+              </option>
+              <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>
+                Lulus
               </option>
               <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>
                 Semua Status

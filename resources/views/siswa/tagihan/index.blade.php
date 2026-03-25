@@ -155,7 +155,7 @@
               <td class="py-3">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-receipt text-primary me-2"></i>
-                  <span class="fw-semibold">{{ $t->jenisTagihan->nama }}</span>
+                  <span class="fw-semibold">{{ $t->jenisTagihan->nama}} {{ $t->periode }}</span>
                 </div>
               </td>
               <td class="py-3">Rp {{ number_format($t->total_tagihan, 0, ',', '.') }}</td>

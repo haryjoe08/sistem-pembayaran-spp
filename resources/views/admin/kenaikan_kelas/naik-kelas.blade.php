@@ -48,6 +48,7 @@
                   <li>Pilih <strong>Kelas Tujuan</strong> untuk kenaikan kelas</li>
                   <li>Centang siswa yang akan dinaikkan kelasnya</li>
                   <li>Hanya siswa dengan status <span class="badge bg-success">Aktif</span> yang ditampilkan</li>
+                  <li>Opsi <strong>Lulus</strong> hanya tersedia untuk siswa kelas XII</li>
                 </ul>
               </div>
             </div>
@@ -64,7 +65,7 @@
                   required>
                   <option value="">-- Pilih Kelas Asal --</option>
                   @foreach($kelas as $k)
-                  <option value="{{ $k->id }}">{{ $k->kelas }}</option>
+                  <option value="{{ $k->id }}" data-kelas-nama="{{ $k->kelas }}">{{ $k->kelas }}</option>
                   @endforeach
                 </select>
                 @error('kelas_asal_id')
@@ -104,12 +105,13 @@
                       name="action_type"
                       id="action_lulus"
                       value="lulus"
-                      onchange="toggleKelasTujuan()">
+                      onchange="toggleKelasTujuan()"
+                      disabled>
 
-                    <label class="btn btn-outline-success p-3 text-start w-100" for="action_lulus">
+                    <label class="btn btn-outline-success p-3 text-start w-100" for="action_lulus" id="label_lulus">
                       <i class="bi bi-mortarboard fs-5 me-2"></i>
                       <div class="fw-bold">Lulus</div>
-                      <small>Ubah status siswa jadi lulus</small>
+                      <small>Ubah status siswa jadi lulus (Hanya untuk kelas XII)</small>
                     </label>
                   </div>
 
@@ -187,7 +189,7 @@
                   </span>
                   <button type="submit" class="btn btn-primary" id="btn-submit" disabled>
                     <i class="bi bi-arrow-up-circle me-1"></i>
-                    Proses Naik Kelas
+                    <span id="btn-submit-text">Proses Naik Kelas</span>
                   </button>
                 </div>
               </div>
@@ -202,6 +204,39 @@
 
 </div>
 
+@if(session('success'))
+@push('scripts')
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    /* =======================
+       Bootstrap Tooltip Init
+    ======================== */
+    const tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    /* =======================
+       Toastr Success Message
+    ======================== */
+    toastr.options = {
+      closeButton: true,
+      progressBar: true,
+      positionClass: "toast-top-right",
+      timeOut: "3000"
+    };
+    toastr.success("{{ session('success') }}");
+
+  });
+</script>
+@endpush
+@endif
+
+
+@push('scripts')
 <script>
   // CSRF Token
   const csrfToken = '{{ csrf_token() }}';
@@ -211,21 +246,61 @@
     const actionType = document.querySelector('input[name="action_type"]:checked').value;
     const kelasTujuanSection = document.getElementById('kelas-tujuan-section');
     const kelasTujuanSelect = document.getElementById('kelas_tujuan_id');
+    const btnSubmitText = document.getElementById('btn-submit-text');
 
     if (actionType === 'lulus') {
       kelasTujuanSection.style.display = 'none';
       kelasTujuanSelect.removeAttribute('required');
       kelasTujuanSelect.value = '';
+      btnSubmitText.innerHTML = '<i class="bi bi-mortarboard me-1"></i> Proses Kelulusan';
     } else {
       kelasTujuanSection.style.display = 'block';
       kelasTujuanSelect.setAttribute('required', 'required');
+      btnSubmitText.innerHTML = '<i class="bi bi-arrow-up-circle me-1"></i> Proses Naik Kelas';
+    }
+  }
+
+  // Check if kelas is XII
+  function isKelasXII(kelasNama) {
+    return kelasNama && kelasNama.toUpperCase().includes('XII');
+  }
+
+  // Toggle Lulus option based on selected kelas
+  function toggleLulusOption() {
+    const kelasAsalSelect = document.getElementById('kelas_asal_id');
+    const selectedOption = kelasAsalSelect.options[kelasAsalSelect.selectedIndex];
+    const kelasNama = selectedOption.getAttribute('data-kelas-nama') || '';
+    
+    const actionLulusRadio = document.getElementById('action_lulus');
+    const labelLulus = document.getElementById('label_lulus');
+    const actionNaikKelasRadio = document.getElementById('action_naik_kelas');
+
+    if (isKelasXII(kelasNama)) {
+      // Enable lulus option for kelas XII
+      actionLulusRadio.disabled = false;
+      labelLulus.style.opacity = '1';
+      labelLulus.style.cursor = 'pointer';
+    } else {
+      // Disable lulus option for non-XII classes
+      actionLulusRadio.disabled = true;
+      labelLulus.style.opacity = '0.5';
+      labelLulus.style.cursor = 'not-allowed';
+      
+      // If lulus was selected, switch back to naik kelas
+      if (actionLulusRadio.checked) {
+        actionNaikKelasRadio.checked = true;
+        toggleKelasTujuan();
+      }
     }
   }
 
   // Load siswa when kelas asal selected
-  document.getElementById('kelas_asal_id').addEventListener('change', function() {
+  document.getElementById('kelas_asal_id').addEventListener('change', function () {
     const kelasId = this.value;
-
+    
+    // Toggle lulus option based on selected kelas
+    toggleLulusOption();
+    
     if (kelasId) {
       loadSiswa(kelasId);
     } else {
@@ -241,7 +316,6 @@
     const noData = document.getElementById('no-data');
     const errorMessage = document.getElementById('error-message');
 
-    // Show section & loading
     siswaSection.style.display = 'block';
     loading.style.display = 'block';
     siswaList.innerHTML = '';
@@ -249,23 +323,20 @@
     errorMessage.style.display = 'none';
     document.getElementById('selected-info').style.display = 'none';
 
-    // FIX: Pakai route() helper Laravel
-    const url = "{{ route('siswa.by-kelas', ['kelasId' => ':kelasId']) }}".replace(':kelasId', kelasId);
-    console.log('Fetching:', url); // Debug
+    const url = "{{ route('siswa.by-kelas', ['kelasId' => ':kelasId']) }}"
+      .replace(':kelasId', kelasId);
 
     fetch(url)
       .then(response => {
-        console.log('Response status:', response.status); // Debug
         if (!response.ok) {
-          throw new Error('Network response was not ok: ' + response.status);
+          throw new Error('HTTP ' + response.status);
         }
         return response.json();
       })
       .then(data => {
-        console.log('Data received:', data); // Debug
         loading.style.display = 'none';
 
-        if (data.success && data.data && data.data.length > 0) {
+        if (data.success && data.data.length > 0) {
           renderSiswa(data.data);
           document.getElementById('total-siswa').textContent = data.count;
         } else {
@@ -274,10 +345,10 @@
         }
       })
       .catch(error => {
-        console.error('Error:', error);
         loading.style.display = 'none';
         errorMessage.style.display = 'block';
-        document.getElementById('error-text').textContent = 'Gagal memuat data siswa: ' + error.message;
+        document.getElementById('error-text').textContent =
+          'Gagal memuat data siswa: ' + error.message;
       });
   }
 
@@ -286,141 +357,68 @@
     const siswaList = document.getElementById('siswa-list');
     siswaList.innerHTML = '';
 
-    siswa.forEach((s) => {
+    siswa.forEach(s => {
       const genderIcon = s.jenis_kelamin === 'L' ? 'bi-gender-male' : 'bi-gender-female';
-      const genderColor = s.jenis_kelamin === 'L' ? 'text-primary' : 'text-danger';
       const genderBadge = s.jenis_kelamin === 'L' ? 'bg-primary' : 'bg-danger';
       const genderText = s.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan';
 
-      const card = `
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card border siswa-card h-100">
-                    <div class="card-body p-3">
-                        <div class="form-check">
-                            <input class="form-check-input siswa-checkbox" 
-                                   type="checkbox" 
-                                   name="siswa_ids[]" 
-                                   value="${s.nis}" 
-                                   id="siswa-${s.nis}"
-                                   onchange="updateSelectedCount()">
-                            <label class="form-check-label w-100" for="siswa-${s.nis}">
-                                <div class="d-flex align-items-start">
-                                    <div class="flex-grow-1">
-                                        <strong class="d-block">${s.nama}</strong>
-                                        <small class="text-muted">NIS: ${s.nis}</small>
-                                        <br>
-                                        <span class="badge ${genderBadge} mt-1">
-                                            <i class="bi ${genderIcon} me-1"></i>
-                                            ${genderText}
-                                        </span>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+      siswaList.innerHTML += `
+        <div class="col-md-6 col-lg-4 mb-3">
+          <div class="card border siswa-card h-100">
+            <div class="card-body p-3">
+              <div class="form-check">
+                <input class="form-check-input siswa-checkbox"
+                       type="checkbox"
+                       name="siswa_ids[]"
+                       value="${s.nis}"
+                       onchange="updateSelectedCount()">
+                <label class="form-check-label w-100">
+                  <strong>${s.nama}</strong><br>
+                  <small class="text-muted">NIS: ${s.nis}</small><br>
+                  <span class="badge ${genderBadge} mt-1">
+                    <i class="bi ${genderIcon} me-1"></i>${genderText}
+                  </span>
+                </label>
+              </div>
             </div>
-        `;
-      siswaList.innerHTML += card;
+          </div>
+        </div>`;
     });
   }
 
-  // Select all
   function selectAll() {
-    document.querySelectorAll('.siswa-checkbox').forEach(cb => {
-      cb.checked = true;
-    });
+    document.querySelectorAll('.siswa-checkbox').forEach(cb => cb.checked = true);
     updateSelectedCount();
   }
 
-  // Deselect all
   function deselectAll() {
-    document.querySelectorAll('.siswa-checkbox').forEach(cb => {
-      cb.checked = false;
-    });
+    document.querySelectorAll('.siswa-checkbox').forEach(cb => cb.checked = false);
     updateSelectedCount();
   }
 
-  // Update selected count
   function updateSelectedCount() {
     const checked = document.querySelectorAll('.siswa-checkbox:checked').length;
     document.getElementById('selected-count').textContent = checked;
 
-    const selectedInfo = document.getElementById('selected-info');
-    const btnSubmit = document.getElementById('btn-submit');
+    const info = document.getElementById('selected-info');
+    const btn = document.getElementById('btn-submit');
 
     if (checked > 0) {
-      selectedInfo.style.display = 'block';
-      btnSubmit.disabled = false;
-
-      // Update button text based on action type
-      const actionType = document.querySelector('input[name="action_type"]:checked').value;
-      if (actionType === 'lulus') {
-        btnSubmit.innerHTML = '<i class="bi bi-mortarboard me-1"></i> Proses Kelulusan';
-      } else {
-        btnSubmit.innerHTML = '<i class="bi bi-arrow-up-circle me-1"></i> Proses Naik Kelas';
-      }
+      info.style.display = 'block';
+      btn.disabled = false;
     } else {
-      selectedInfo.style.display = 'none';
-      btnSubmit.disabled = true;
+      info.style.display = 'none';
+      btn.disabled = true;
     }
   }
 
-  // Form validation
-  document.getElementById('form-naik-kelas').addEventListener('submit', function(e) {
-    const kelasAsal = document.getElementById('kelas_asal_id');
-    const kelasTujuan = document.getElementById('kelas_tujuan_id');
-    const actionType = document.querySelector('input[name="action_type"]:checked').value;
-    const checked = document.querySelectorAll('.siswa-checkbox:checked').length;
-
-    if (!kelasAsal.value) {
-      e.preventDefault();
-      alert('Pilih kelas asal!');
-      return false;
-    }
-
-    if (actionType === 'naik_kelas') {
-      if (!kelasTujuan.value) {
-        e.preventDefault();
-        alert('Pilih kelas tujuan untuk naik kelas!');
-        return false;
-      }
-
-      if (kelasAsal.value === kelasTujuan.value) {
-        e.preventDefault();
-        alert('Kelas asal dan kelas tujuan tidak boleh sama!');
-        return false;
-      }
-    }
-
-    if (checked === 0) {
-      e.preventDefault();
-      alert('Pilih minimal 1 siswa!');
-      return false;
-    }
-
-    const kelasAsalText = kelasAsal.options[kelasAsal.selectedIndex].text;
-    let confirmMessage = '';
-
-    if (actionType === 'lulus') {
-      confirmMessage = `Yakin ingin meluluskan ${checked} siswa dari ${kelasAsalText}?\n\nStatus siswa akan berubah menjadi LULUS.`;
-    } else {
-      const kelasTujuanText = kelasTujuan.options[kelasTujuan.selectedIndex].text;
-      confirmMessage = `Yakin ingin menaikkan ${checked} siswa dari ${kelasAsalText} ke ${kelasTujuanText}?`;
-    }
-
-    const confirm = window.confirm(confirmMessage);
-
-    if (!confirm) {
-      e.preventDefault();
-    }
-  });
-
-  // Update button text when action type changes
-  document.querySelectorAll('input[name="action_type"]').forEach(radio => {
-    radio.addEventListener('change', updateSelectedCount);
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    toggleLulusOption();
   });
 </script>
+@endpush
+
 
 <style>
   .siswa-card {
@@ -448,5 +446,43 @@
   .form-check-label {
     cursor: pointer;
   }
+
+  #toast-container>div {
+    opacity: 1 !important;
+    background-image: none !important;
+  }
+
+  .toast-success {
+    background-color: #198754 !important;
+  }
+
+  .toast-error {
+    background-color: #dc3545 !important;
+  }
+
+  .toast-info {
+    background-color: #0dcaf0 !important;
+  }
+
+  .toast-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+  }
+
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  .btn-group-sm .btn {
+    padding: 4px 8px;
+  }
+
+  /* Style for disabled lulus option */
+  #label_lulus {
+    transition: opacity 0.3s ease;
+  }
 </style>
+
+
 @endsection

@@ -45,7 +45,9 @@ class SiswaController extends Controller
             $query->where('jurusan_id', $request->jurusan);
         }
 
-        $siswas = $query->orderBy('nis', 'asc')->paginate(10);
+        $siswas = $query->orderBy('kelas_id', 'asc')  // XII, XI, X (alphabetically desc)
+            ->orderBy('nis', 'asc')
+            ->paginate(10);
 
         // Append query string ke pagination links
         $siswas->appends($request->except('page'));
@@ -109,9 +111,8 @@ class SiswaController extends Controller
     {
         $kelas = Kelas::all()->where('status', 'aktif');
         $jurusan = Jurusan::all()->where('status', 'aktif');
-        $tahunAjarans = TahunAjaran::all();
 
-        return view('admin.master_data.siswa.create', compact('kelas', 'jurusan', 'tahunAjarans'));
+        return view('admin.master_data.siswa.create', compact('kelas', 'jurusan'));
     }
     public function store(Request $request)
     {
@@ -165,8 +166,8 @@ class SiswaController extends Controller
 
     public function edit(Siswa $siswa)
     {
-        $kelas = Kelas::all();
-        $jurusan = Jurusan::all();
+        $kelas = Kelas::all()->where('status', 'aktif');
+        $jurusan = Jurusan::all()->where('status', 'aktif');
 
         return view('admin.master_data.siswa.edit', compact('siswa', 'kelas', 'jurusan'));
     }
@@ -208,16 +209,16 @@ class SiswaController extends Controller
         return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil diperbarui');
     }
 
-    public function destroy($nis)
-    {
-        $siswa = Siswa::findOrFail($nis);
+    // public function destroy($nis)
+    // {
+    //     $siswa = Siswa::findOrFail($nis);
 
-        optional($siswa->login)->delete();
+    //     optional($siswa->login)->delete();
 
-        $siswa->delete();
+    //     $siswa->delete();
 
-        return redirect()->route('siswa.index')->with('success', 'Siswa berhasil dihapus!');
-    }
+    //     return redirect()->route('siswa.index')->with('success', 'Siswa berhasil dihapus!');
+    // }
 
     public function showNaikKelas()
     {
@@ -341,38 +342,39 @@ class SiswaController extends Controller
     /**
      * Bulk update status
      */
-    public function bulkUpdateStatus(Request $request)
-    {
-        $request->validate([
-            'siswa_ids' => 'required|array|min:1',
-            'siswa_ids.*' => 'exists:siswa,nis',
-            'status' => 'required|in:aktif,tidak_aktif,lulus,pindah,keluar',
-        ]);
+    // public function bulkUpdateStatus(Request $request)
+    // {
+    //     $request->validate([
+    //         'siswa_ids' => 'required|array|min:1',
+    //         'siswa_ids.*' => 'exists:siswa,nis',
+    //         'status' => 'required|in:aktif,tidak_aktif,lulus,pindah,keluar',
+    //     ]);
 
-        DB::beginTransaction();
-        try {
-            $updated = Siswa::whereIn('nis', $request->siswa_ids)
-                ->update(['status' => $request->status]);
+    //     DB::beginTransaction();
+    //     try {
+    //         $updated = Siswa::whereIn('nis', $request->siswa_ids)
+    //             ->update(['status' => $request->status]);
 
-            DB::commit();
+    //         DB::commit();
 
-            $statusText = ucfirst(str_replace('_', ' ', $request->status));
-            return back()->with('success', "Berhasil mengubah status {$updated} siswa menjadi {$statusText}");
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
-    }
+    //         $statusText = ucfirst(str_replace('_', ' ', $request->status));
+    //         return back()->with('success', "Berhasil mengubah status {$updated} siswa menjadi {$statusText}");
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+    //     }
+    // }
     public function export(Request $request)
     {
+        $nama = $request->input('search');
         $status = $request->input('status');
-        $kelasId = $request->input('kelas_id');
-        $jurusanId = $request->input('jurusan_id');
+        $kelasId = $request->input('kelas'); // ubah dari kelas_id ke kelas
+        $jurusanId = $request->input('jurusan'); // ubah dari jurusan_id ke jurusan
 
         $fileName = 'data-siswa-' . date('Y-m-d-His') . '.xlsx';
 
         return Excel::download(
-            new SiswaExport($status, $kelasId, $jurusanId),
+            new SiswaExport($nama, $status, $kelasId, $jurusanId),
             $fileName
         );
     }
@@ -398,157 +400,157 @@ class SiswaController extends Controller
      * Generate template Excel
      */
     protected function generateTemplate()
-{
-    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    
-    // ========================================
-    // SHEET 1: DATA SISWA (HARUS SHEET PERTAMA!)
-    // ========================================
-    $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setTitle('Data Siswa'); // 🔧 Kasih nama yang jelas
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 
-    // Header
-    $headers = [
-        'NIS',
-        'Nama',
-        'Kelas',
-        'Jurusan',
-        'Tahun Masuk',
-        'Jenis Kelamin',
-        'Tanggal Lahir',
-        'Alamat',
-        'Wali',
-        'Kontak',
-        'Status',
-    ];
+        // ========================================
+        // SHEET 1: DATA SISWA (HARUS SHEET PERTAMA!)
+        // ========================================
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Siswa'); // 🔧 Kasih nama yang jelas
 
-    $sheet->fromArray([$headers], null, 'A1');
+        // Header
+        $headers = [
+            'NIS',
+            'Nama',
+            'Kelas',
+            'Jurusan',
+            'Tahun Masuk',
+            'Jenis Kelamin',
+            'Tanggal Lahir',
+            'Alamat',
+            'Wali',
+            'Kontak',
+            'Status',
+        ];
 
-    // Contoh data
-    $exampleData = [
-        [
-            '12345',
-            'JOHN DOE',
-            'X',
-            'IPA',
-            '2024',
-            'L',
-            '01-01-2010',
-            'Jl. Contoh No. 123',
-            'Casmono',
-            '081234567890',
-            'aktif',
-        ],
-        [
-            '12346',
-            'JANE SMITH',
-            'X',
-            'IPS',
-            '2024',
-            'P',
-            '15-03-2010',
-            'Jl. Contoh No. 456',
-            'Casmudi',
-            '081234567891',
-            'aktif',
-        ],
-    ];
+        $sheet->fromArray([$headers], null, 'A1');
 
-    $sheet->fromArray($exampleData, null, 'A2');
+        // Contoh data
+        $exampleData = [
+            [
+                '12345',
+                'JOHN DOE',
+                'X',
+                'IPA',
+                '2024',
+                'L',
+                '01-01-2010',
+                'Jl. Contoh No. 123',
+                'Casmono',
+                '081234567890',
+                'aktif',
+            ],
+            [
+                '12346',
+                'JANE SMITH',
+                'X',
+                'IPS',
+                '2024',
+                'P',
+                '15-03-2010',
+                'Jl. Contoh No. 456',
+                'Casmudi',
+                '081234567891',
+                'aktif',
+            ],
+        ];
 
-    // Styling header
-    $headerStyle = [
-        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-        'fill' => [
-            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-            'startColor' => ['rgb' => '4472C4'],
-        ],
-        'alignment' => [
-            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-        ],
-    ];
+        $sheet->fromArray($exampleData, null, 'A2');
 
-    $sheet->getStyle('A1:K1')->applyFromArray($headerStyle);
+        // Styling header
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4472C4'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+        ];
 
-    // Width kolom
-    $sheet->getColumnDimension('A')->setWidth(15);
-    $sheet->getColumnDimension('B')->setWidth(30);
-    $sheet->getColumnDimension('C')->setWidth(12);
-    $sheet->getColumnDimension('D')->setWidth(15);
-    $sheet->getColumnDimension('E')->setWidth(15);
-    $sheet->getColumnDimension('F')->setWidth(15);
-    $sheet->getColumnDimension('G')->setWidth(15);
-    $sheet->getColumnDimension('H')->setWidth(40);
-    $sheet->getColumnDimension('I')->setWidth(25);
-    $sheet->getColumnDimension('J')->setWidth(18);
-    $sheet->getColumnDimension('K')->setWidth(15);
+        $sheet->getStyle('A1:K1')->applyFromArray($headerStyle);
 
-    // 🔧 PERBAIKAN: Tambahkan border dan freeze pane
-    $sheet->getStyle('A1:K3')->getBorders()->getAllBorders()
-        ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-    $sheet->freezePane('A2'); // Freeze header row
+        // Width kolom
+        $sheet->getColumnDimension('A')->setWidth(15);
+        $sheet->getColumnDimension('B')->setWidth(30);
+        $sheet->getColumnDimension('C')->setWidth(12);
+        $sheet->getColumnDimension('D')->setWidth(15);
+        $sheet->getColumnDimension('E')->setWidth(15);
+        $sheet->getColumnDimension('F')->setWidth(15);
+        $sheet->getColumnDimension('G')->setWidth(15);
+        $sheet->getColumnDimension('H')->setWidth(40);
+        $sheet->getColumnDimension('I')->setWidth(25);
+        $sheet->getColumnDimension('J')->setWidth(18);
+        $sheet->getColumnDimension('K')->setWidth(15);
 
-    // ========================================
-    // SHEET 2: INSTRUKSI (PINDAH KE BELAKANG!)
-    // ========================================
-    $instructionSheet = $spreadsheet->createSheet();
-    $instructionSheet->setTitle('Instruksi');
+        // 🔧 PERBAIKAN: Tambahkan border dan freeze pane
+        $sheet->getStyle('A1:K3')->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        $sheet->freezePane('A2'); // Freeze header row
 
-    $instructions = [
-        ['INSTRUKSI IMPORT DATA SISWA'],
-        [''],
-        ['⚠️ PENTING: Pastikan sheet aktif adalah "Data Siswa", bukan "Instruksi"!'],
-        ['⚠️ WAJIB: Hapus baris contoh (John Doe & Jane Smith) sebelum import data asli!'],
-        [''],
-        ['PENJELASAN KOLOM:'],
-        ['1. NIS: Nomor Induk Siswa (WAJIB, unik, hanya angka)'],
-        ['2. Nama: Nama lengkap siswa (WAJIB, otomatis uppercase)'],
-        ['3. Kelas: X, XI, atau XII (WAJIB)'],
-        ['4. Jurusan: IPA, IPS, atau lainnya (WAJIB)'],
-        ['5. Tahun Masuk: Tahun masuk siswa (contoh: 2024, default: tahun sekarang)'],
-        ['6. Jenis Kelamin: L atau P (WAJIB)'],
-        ['7. Tanggal Lahir: Format dd-mm-yyyy (contoh: 01-01-2010)'],
-        ['8. Alamat: Alamat lengkap (opsional, default: -)'],
-        ['9. Wali: Nama wali/orang tua (opsional, default: -)'],
-        ['10. Kontak: Nomor HP wali/siswa (opsional, default: -)'],
-        ['11. Status: aktif, tidak_aktif, lulus, keluar (default: aktif)'],
-        [''],
-        ['CATATAN PENTING:'],
-        ['✓ JANGAN ubah urutan dan nama header kolom'],
-        ['✓ Jika NIS sudah ada, data akan di-UPDATE'],
-        ['✓ Jika NIS baru, otomatis dibuatkan akun login (username=NIS, password=tanggal lahir ddmmyyyy)'],
-        ['✓ Kelas/Jurusan yang belum ada akan otomatis dibuat'],
-        [''],
-        ['FORMAT YANG VALID:'],
-        ['• Tanggal: 01-01-2010, 2010-01-01, 01/01/2010'],
-        ['• Jenis Kelamin: L, P, Laki-laki, Perempuan, Male, Female'],
-        ['• Status: aktif, tidak_aktif, lulus, keluar'],
-        [''],
-        ['TROUBLESHOOTING:'],
-        ['• Import gagal? Cek log error di sistem'],
-        ['• Data tidak masuk? Pastikan tidak ada row kosong di tengah data'],
-        ['• NIS sudah ada? Data akan di-update, tidak error'],
-    ];
+        // ========================================
+        // SHEET 2: INSTRUKSI (PINDAH KE BELAKANG!)
+        // ========================================
+        $instructionSheet = $spreadsheet->createSheet();
+        $instructionSheet->setTitle('Instruksi');
 
-    $instructionSheet->fromArray($instructions, null, 'A1');
-    $instructionSheet->getColumnDimension('A')->setWidth(90);
-    $instructionSheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $instructionSheet->getStyle('A3')->getFont()->setBold(true)->setSize(12)
-        ->getColor()->setRGB('FF0000'); // Warning merah
+        $instructions = [
+            ['INSTRUKSI IMPORT DATA SISWA'],
+            [''],
+            ['⚠️ PENTING: Pastikan sheet aktif adalah "Data Siswa", bukan "Instruksi"!'],
+            ['⚠️ WAJIB: Hapus baris contoh (John Doe & Jane Smith) sebelum import data asli!'],
+            [''],
+            ['PENJELASAN KOLOM:'],
+            ['1. NIS: Nomor Induk Siswa (WAJIB, unik, hanya angka)'],
+            ['2. Nama: Nama lengkap siswa (WAJIB, otomatis uppercase)'],
+            ['3. Kelas: X, XI, atau XII (WAJIB)'],
+            ['4. Jurusan: IPA, IPS, atau lainnya (WAJIB)'],
+            ['5. Tahun Masuk: Tahun masuk siswa (contoh: 2024, default: tahun sekarang)'],
+            ['6. Jenis Kelamin: L atau P (WAJIB)'],
+            ['7. Tanggal Lahir: Format dd-mm-yyyy (contoh: 01-01-2010)'],
+            ['8. Alamat: Alamat lengkap (opsional, default: -)'],
+            ['9. Wali: Nama wali/orang tua (opsional, default: -)'],
+            ['10. Kontak: Nomor HP wali/siswa (opsional, default: -)'],
+            ['11. Status: aktif, tidak_aktif, lulus, keluar (default: aktif)'],
+            [''],
+            ['CATATAN PENTING:'],
+            ['✓ JANGAN ubah urutan dan nama header kolom'],
+            ['✓ Jika NIS sudah ada, data akan di-UPDATE'],
+            ['✓ Jika NIS baru, otomatis dibuatkan akun login (username=NIS, password=tanggal lahir ddmmyyyy)'],
+            ['✓ Kelas/Jurusan yang belum ada akan otomatis dibuat'],
+            [''],
+            ['FORMAT YANG VALID:'],
+            ['• Tanggal: 01-01-2010, 2010-01-01, 01/01/2010'],
+            ['• Jenis Kelamin: L, P, Laki-laki, Perempuan, Male, Female'],
+            ['• Status: aktif, tidak_aktif, lulus, keluar'],
+            [''],
+            ['TROUBLESHOOTING:'],
+            ['• Import gagal? Cek log error di sistem'],
+            ['• Data tidak masuk? Pastikan tidak ada row kosong di tengah data'],
+            ['• NIS sudah ada? Data akan di-update, tidak error'],
+        ];
 
-    // 🔧 PERBAIKAN: Set sheet "Data Siswa" sebagai active sheet
-    $spreadsheet->setActiveSheetIndex(0);
+        $instructionSheet->fromArray($instructions, null, 'A1');
+        $instructionSheet->getColumnDimension('A')->setWidth(90);
+        $instructionSheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $instructionSheet->getStyle('A3')->getFont()->setBold(true)->setSize(12)
+            ->getColor()->setRGB('FF0000'); // Warning merah
 
-    // Generate file
-    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        // 🔧 PERBAIKAN: Set sheet "Data Siswa" sebagai active sheet
+        $spreadsheet->setActiveSheetIndex(0);
 
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment;filename="template-import-siswa.xlsx"');
-    header('Cache-Control: max-age=0');
+        // Generate file
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 
-    $writer->save('php://output');
-    exit;
-}
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="template-import-siswa.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
 
 
     /**

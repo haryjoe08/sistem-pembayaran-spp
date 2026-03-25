@@ -22,10 +22,14 @@ class JenisPembayaranController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255|unique:jenis_tagihan,nama',
+            'tipe' => 'required|string|in:bulanan,tahunan,insidental',
+            'deskripsi' => 'nullable|string|max:255',
         ]);
 
         JenisPembayaran::create([
             'nama' => $request->nama,
+            'tipe' => $request->tipe,
+            'deskripsi' => $request->deskripsi,
             'status' => 'aktif', // default
         ]);
 
@@ -46,10 +50,14 @@ class JenisPembayaranController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255|unique:jenis_tagihan,nama,' . $jenis_pembayaran->id,
+            'tipe' => 'required|string|in:bulanan,tahunan,insidental',
+            'deskripsi' => 'nullable|string|max:255',
         ]);
 
         $jenis_pembayaran->update([
             'nama' => $request->nama,
+            'tipe' => $request->tipe,
+            'deskripsi' => $request->deskripsi,
         ]);
 
         return redirect()

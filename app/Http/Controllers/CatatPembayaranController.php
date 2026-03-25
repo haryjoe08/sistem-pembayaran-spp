@@ -19,24 +19,32 @@ class CatatPembayaranController extends Controller
             'keyword' => 'required|string|min:1'
         ], [
             'keyword.required' => 'Masukkan NIS atau nama siswa',
-            'keyword.min' => 'Minimal 1 karakter'
+            'keyword.min'      => 'Minimal 1 karakter'
         ]);
 
-        $siswa = Siswa::with(['kelas', 'tagihan.jenisTagihan'])
+        $hasil = Siswa::with(['kelas', 'tagihan.jenisTagihan'])
             ->where('nis', $request->keyword)
             ->orWhere('nama', 'like', "%{$request->keyword}%")
-            ->first();
+            ->get();
 
-        if (!$siswa) {
+        if ($hasil->isEmpty()) {
             return back()->withInput()->with('swal_error', [
                 'title' => 'Siswa Tidak Ditemukan!',
-                'text'  => "Siswa dengan NIS atau nama \"{$request->keyword}\" tidak ditemukan.",
+                'text'  => "Siswa dengan NIS atau nama {$request->keyword} tidak ditemukan.",
                 'icon'  => 'error',
             ]);
         }
 
-        return view('admin.pembayaran.catat_pembayaran.index', compact('siswa'));
+        // Jika hasil hanya 1, langsung tampilkan detail
+        if ($hasil->count() === 1) {
+            $siswa = $hasil->first();
+            return view('admin.pembayaran.catat_pembayaran.index', compact('siswa'));
+        }
+
+        // Jika lebih dari 1, tampilkan daftar pilihan
+        return view('admin.pembayaran.catat_pembayaran.index', ['daftarSiswa' => $hasil]);
     }
+
 
     public function proses(Request $request, $id)
     {
@@ -87,7 +95,6 @@ class CatatPembayaranController extends Controller
                     'catatan'       => $request->catatan,
                 ])
                 ->with('transaksi_id', $transaksi->id);
-
         } catch (\Throwable $e) {
             DB::rollBack();
 

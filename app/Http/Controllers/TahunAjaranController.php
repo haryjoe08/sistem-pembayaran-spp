@@ -23,7 +23,7 @@ class TahunAjaranController extends Controller
             'tahun' => 'required|string|max:50|unique:tahun_ajaran,tahun',
         ]);
 
-        // create via Eloquent (memerlukan $fillable di model)
+     
         TahunAjaran::create([
             'tahun' => $request->tahun,
             'status' => 'nonaktif',

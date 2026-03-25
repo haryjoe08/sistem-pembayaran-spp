@@ -201,7 +201,7 @@
               </ul>
             </li>
 
-            <li class="nav-item has-treeview">
+            <li class="nav-item has-treeview {{ Request::is('laporan*')  ? 'menu-open' : '' }}" >
               <a href="#" class="nav-link">
                 <i class="bi bi-graph-up"></i>
                 <p> Laporan <i class="nav-arrow bi bi-chevron-right"></i> </p>

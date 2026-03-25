@@ -92,7 +92,7 @@
                   id="nama"
                   name="nama"
                   type="text"
-                  oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')"
+                  oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
                   value="{{ old('nama') }}"
                   placeholder="Nama lengkap siswa"
                   required>
@@ -256,6 +256,7 @@
                   id="wali"
                   name="wali"
                   value="{{ old('wali') }}"
+                  oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
                   placeholder="Nama orang tua/wali siswa"
                   required>
                 @error('wali')

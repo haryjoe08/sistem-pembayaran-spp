@@ -193,7 +193,7 @@
                     <i class="bi bi-pencil"></i>
                   </a>
 
-                  {{-- Hapus --}}
+                  <!-- {{-- Hapus --}}
                   <form action="{{ route('tarif-tagihan.destroy', $t->id) }}"
                     method="POST"
                     class="d-inline"
@@ -203,7 +203,7 @@
                     <button class="btn btn-danger" title="Hapus">
                       <i class="bi bi-trash"></i>
                     </button>
-                  </form>
+                  </form> -->
 
                 </div>
               </td>

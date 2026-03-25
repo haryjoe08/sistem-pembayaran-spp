@@ -95,7 +95,7 @@
           @if($paymentOrder->isSuccess())
             <div class="alert alert-success mt-3 mb-0">
               <i class="bi bi-check-circle me-2"></i>
-              Pembayaran telah tercatat. Kwitansi dapat dilihat di halaman riwayat pembayaran.
+              Transaksi telah dikonfirmasi dan Pembayaran telah tercatat.
             </div>
           @endif
 
@@ -146,6 +146,7 @@
         </div>
       </div>
 
+      
       <!-- Action Buttons -->
       <div class="d-grid gap-2">
         @if($paymentOrder->isSuccess())

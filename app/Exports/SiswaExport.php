@@ -23,12 +23,14 @@ class SiswaExport implements
     WithColumnWidths,
     WithTitle
 {
+    protected $search;
     protected $status;
     protected $kelasId;
     protected $jurusanId;
 
-    public function __construct($status = null, $kelasId = null, $jurusanId = null)
+    public function __construct($search = null, $status = null, $kelasId = null, $jurusanId = null)
     {
+        $this->search = $search;
         $this->status = $status;
         $this->kelasId = $kelasId;
         $this->jurusanId = $jurusanId;
@@ -40,6 +42,14 @@ class SiswaExport implements
     public function collection()
     {
         $query = Siswa::with(['kelas', 'jurusan']);
+
+        // Filter search (NIS atau Nama)
+        if ($this->search) {
+            $query->where(function($q) {
+                $q->where('nis', 'like', '%' . $this->search . '%')
+                  ->orWhere('nama', 'like', '%' . $this->search . '%');
+            });
+        }
 
         // Filter status
         if ($this->status && $this->status !== 'semua') {
@@ -56,7 +66,12 @@ class SiswaExport implements
             $query->where('jurusan_id', $this->jurusanId);
         }
 
-        return $query->orderBy('nama')->get();
+        // Ambil data dan urutkan dengan collection
+        return $query->get()->sortBy([
+            fn($a, $b) => ($a->kelas->kelas ?? '') <=> ($b->kelas->kelas ?? ''),
+            fn($a, $b) => ($a->jurusan->nama ?? '') <=> ($b->jurusan->nama ?? ''),
+            fn($a, $b) => $a->nama <=> $b->nama,
+        ])->values();
     }
 
     /**
@@ -73,7 +88,7 @@ class SiswaExport implements
             'Jenis Kelamin',
             'Tanggal Lahir',
             'Alamat',
-            'Wali', 
+            'Wali',
             'Kontak',
             'Status',
         ];
@@ -91,11 +106,12 @@ class SiswaExport implements
             $siswa->jurusan->nama ?? '-',
             $siswa->tahun_masuk ?? '-',
             $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan',
+            // Perbaiki: gunakan tgl_lahir (bukan tanggal_lahir)
             $siswa->tgl_lahir
-                ? Carbon::parse($siswa->tanggal_lahir)->format('d-m-Y')
+                ? Carbon::parse($siswa->tgl_lahir)->format('d-m-Y')
                 : '-',
             $siswa->alamat ?? '-',
-            $siswa->wali,
+            $siswa->wali ?? '-',
             $siswa->kontak ?? '-',
             ucfirst(str_replace('_', ' ', $siswa->status)),
         ];
@@ -145,8 +161,8 @@ class SiswaExport implements
             'F' => 15, // Jenis Kelamin
             'G' => 15, // Tanggal Lahir
             'H' => 40, // Alamat
-            'I' => 15, // Kontak
-            'J' => 40, // Wali
+            'I' => 20, // Wali
+            'J' => 15, // Kontak
             'K' => 15, // Status
         ];
     }

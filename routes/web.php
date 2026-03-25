@@ -66,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Update Status
     Route::post('/siswa/{nis}/update-status', [SiswaController::class, 'updateStatus'])->name('siswa.update-status');
-    Route::post('/siswa/bulk-update-status', [SiswaController::class, 'bulkUpdateStatus'])->name('siswa.bulk-update-status');
+    // Route::post('/siswa/bulk-update-status', [SiswaController::class, 'bulkUpdateStatus'])->name('siswa.bulk-update-status');
 
     // Siswa
        // Export & Import
@@ -171,6 +171,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export/pembayaran', [LaporanController::class, 'exportPembayaran'])->name('laporan.export.pembayaran');
         Route::get('/export/tunggakan', [LaporanController::class, 'exportTunggakan'])->name('laporan.export.tunggakan');
         Route::get('/export/per-kelas', [LaporanController::class, 'exportPerKelas'])->name('laporan.export.per-kelas');
+
+        //print routes
+        Route::get('/laporan/pembayaran/print', [LaporanController::class, 'printPembayaran'])->name('laporan.pembayaran.print');
+        Route::get('/laporan/tunggakan/print', [LaporanController::class, 'printTunggakan'])->name('laporan.tunggakan.print');
     });
     // Routes untuk Siswa Side
     Route::prefix('siswa-side')->middleware(['auth'])->group(function () {

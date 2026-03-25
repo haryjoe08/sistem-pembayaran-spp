@@ -23,6 +23,7 @@
             background: #f8f9fa;
             overflow-x: hidden;
         }
+        
 
         /* Sidebar Styles - Updated for Professional and Elegant Look */
         .sidebar {
@@ -395,20 +396,20 @@
                 ->where('status', 'belum lunas')
                 ->count();
                 @endphp
-                <a href="{{ route('siswa.tagihan') }}" class="nav-link {{ Request::is('siswa/tagihan') ? 'active' : '' }}">
+                <a href="{{ route('siswa.tagihan') }}" class="nav-link {{ Request::is('siswa-side/tagihan/*') ? 'active' : '' }}">
                     <i class="fas fa-file-invoice"></i>
                     <span>Tagihan Saya</span>
                     <span class="badge">{{ $tagihanAktif ?? 0 }}</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('siswa.history') }}">
+                <a href="{{ route('siswa.history') }}"  class="nav-link {{ Request::is('siswa-side/history') ? 'active' : '' }}">
                     <i class="fas fa-history"></i>
                     <span>Riwayat Transaksi</span>
                 </a>
             </li>
             <li>
-                <a href="{{route('siswa.profil') }}">
+                <a href="{{route('siswa.profil') }}"  class="nav-link {{ Request::is('siswa-side/profil') ? 'active' : '' }}">
                     <i class="fas fa-user-circle"></i>
                     <span>Profil Saya</span>
                 </a>

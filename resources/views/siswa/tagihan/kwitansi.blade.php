@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,7 +22,7 @@
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .kwitansi-header {
@@ -230,7 +231,7 @@
             cursor: pointer;
             border: none;
             font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
             text-decoration: none;
             display: inline-flex;
@@ -250,7 +251,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
 
         @media print {
@@ -274,15 +275,16 @@
         }
     </style>
 </head>
+
 <body>
     <div class="kwitansi-container">
         <!-- Header -->
         <div class="kwitansi-header">
-            <div class="school-logo">🏫</div>
             <div class="school-name">MA NEGERI EXAMPLE</div>
             <div class="school-address">
-                Jl. Contoh No. 123, Kota, Provinsi 12345<br>
-                Telp: (0271) 123456 | Email: info@man-example.sch.id
+                Alamat :JI. Jenderal Ahmad Yani no. 114Kauman Batang 51215
+                email: manubatang@yahoo.co.id Telp. (0285) 392663
+
             </div>
         </div>
 
@@ -333,12 +335,12 @@
                     <span>Metode Pembayaran</span>
                     <span>
                         @php
-                            $metodeText = [
-                                'cash' => 'Cash/Tunai',
-                                'transfer' => 'Transfer Bank',
-                                'va' => 'Virtual Account',
-                                'qris' => 'QRIS',
-                            ];
+                        $metodeText = [
+                        'cash' => 'Cash/Tunai',
+                        'transfer' => 'Transfer Bank',
+                        'va' => 'Virtual Account',
+                        'qris' => 'QRIS',
+                        ];
                         @endphp
                         {{ $metodeText[$transaksi->metode] ?? $transaksi->metode }}
                     </span>
@@ -402,33 +404,34 @@
         </button>
     </div>
 </body>
+
 </html>
 
 @php
 // Helper function untuk terbilang
 function terbilang($angka) {
-    $angka = abs($angka);
-    $baca = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
-    $terbilang = "";
+$angka = abs($angka);
+$baca = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+$terbilang = "";
 
-    if ($angka < 12) {
-        $terbilang = " " . $baca[$angka];
+if ($angka < 12) {
+    $terbilang=" " . $baca[$angka];
     } else if ($angka < 20) {
-        $terbilang = terbilang($angka - 10) . " belas";
+    $terbilang=terbilang($angka - 10) . " belas" ;
     } else if ($angka < 100) {
-        $terbilang = terbilang($angka / 10) . " puluh" . terbilang($angka % 10);
+    $terbilang=terbilang($angka / 10) . " puluh" . terbilang($angka % 10);
     } else if ($angka < 200) {
-        $terbilang = " seratus" . terbilang($angka - 100);
+    $terbilang=" seratus" . terbilang($angka - 100);
     } else if ($angka < 1000) {
-        $terbilang = terbilang($angka / 100) . " ratus" . terbilang($angka % 100);
+    $terbilang=terbilang($angka / 100) . " ratus" . terbilang($angka % 100);
     } else if ($angka < 2000) {
-        $terbilang = " seribu" . terbilang($angka - 1000);
+    $terbilang=" seribu" . terbilang($angka - 1000);
     } else if ($angka < 1000000) {
-        $terbilang = terbilang($angka / 1000) . " ribu" . terbilang($angka % 1000);
+    $terbilang=terbilang($angka / 1000) . " ribu" . terbilang($angka % 1000);
     } else if ($angka < 1000000000) {
-        $terbilang = terbilang($angka / 1000000) . " juta" . terbilang($angka % 1000000);
+    $terbilang=terbilang($angka / 1000000) . " juta" . terbilang($angka % 1000000);
     }
 
     return trim($terbilang);
-}
-@endphp
+    }
+    @endphp

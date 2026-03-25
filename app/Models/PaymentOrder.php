@@ -102,6 +102,7 @@ class PaymentOrder extends Model
             'bca_klikpay' => 'BCA KlikPay',
             'bri_epay' => 'BRI e-Pay',
             'cimb_clicks' => 'CIMB Clicks',
+            'cstore' => 'Alfamart/Indomart',
             'shopeepay' => 'ShopeePay',
             'alfamart' => 'Alfamart',
             'indomaret' => 'Indomaret',

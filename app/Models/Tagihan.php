@@ -74,4 +74,21 @@ class Tagihan extends Model
     {
         return $this->hasMany(PaymentOrder::class);
     }
+
+    public function getPeriodeAttribute()
+{
+    if (!$this->bulan || !$this->tahunAjaran) {
+        return null;
+    }
+
+    [$tahunAwal, $tahunAkhir] = explode('/', $this->tahunAjaran->tahun);
+    $tahunFinal = $this->bulan >= 7 ? $tahunAwal : $tahunAkhir;
+
+    $namaBulan = \Carbon\Carbon::create()
+        ->month($this->bulan)
+        ->translatedFormat('F');
+
+    return "{$namaBulan} {$tahunFinal}";
+}
+
 }

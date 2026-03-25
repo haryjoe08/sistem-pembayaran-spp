@@ -58,7 +58,7 @@
 
               <!-- Details -->
               <div class="col-lg-6 mb-3 mb-lg-0">
-                <h6 class="fw-bold mb-2">{{ $t->tagihan->jenisTagihan->nama ?? 'Pembayaran' }}</h6>
+                <h6 class="fw-bold mb-2 text-uppercase">{{ $t->tagihan->jenisTagihan->nama ?? 'Pembayaran' }} {{ $t->tagihan->periode }}</h6>
                 <div class="d-flex gap-3 flex-wrap">
                   <div>
                     <small class="text-muted d-block">ID Transaksi</small>
@@ -98,16 +98,7 @@
                 </div>
               </div>
 
-              <!-- Action -->
-              <div class="col-lg-1 text-lg-center">
-                <a href="{{ route('siswa.kwitansi', $t->id) }}" 
-                   class="btn btn-outline-primary btn-sm"
-                   target="_blank"
-                   data-bs-toggle="tooltip"
-                   title="Lihat Kwitansi">
-                  <i class="bi bi-printer"></i>
-                </a>
-              </div>
+             
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 @section('content')
 <style>
+    
     .card {
         border: none;
         border-radius: 12px;
@@ -363,7 +364,7 @@
                                 @forelse($tagihanTerbaru as $tagihan)
                                 <tr>
                                     <td>
-                                        <strong>{{ $tagihan->jenisTagihan->nama ?? '-' }}</strong>
+                                        <strong>{{ $tagihan->jenisTagihan->nama ?? '-' }} {{ $tagihan->periode }}</strong>
                                     </td>
                                     <td>Rp {{ number_format($tagihan->total_tagihan, 0, ',', '.') }}</td>
                                     <td class="text-success">Rp {{ number_format($tagihan->sudah_dibayar, 0, ',', '.') }}</td>

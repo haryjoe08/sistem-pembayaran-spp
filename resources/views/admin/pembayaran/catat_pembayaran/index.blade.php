@@ -54,7 +54,42 @@
       </div>
     </div>
   </div>
-
+  @isset($daftarSiswa)
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3">
+          <h5 class="fw-bold mb-0">
+            <i class="bi bi-people me-2 text-primary"></i>
+            Ditemukan {{ $daftarSiswa->count() }} Siswa
+            <small class="text-muted fw-normal">— Pilih siswa yang dimaksud</small>
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          @foreach($daftarSiswa as $s)
+          <div class="border-bottom p-3 d-flex justify-content-between align-items-center hover-row">
+            <div class="d-flex align-items-center gap-3">
+              <img src="https://ui-avatars.com/api/?name={{ urlencode($s->nama) }}&background=667eea&color=fff&size=48&bold=true"
+                class="rounded-circle" width="48" height="48">
+              <div>
+                <div class="fw-bold">{{ $s->nama }}</div>
+                <small class="text-muted">
+                  NIS: {{ $s->nis }} &bull; Kelas: {{ $s->kelas->kelas }}
+                </small>
+              </div>
+            </div>
+            <a href="{{ route('pembayaran.cari') }}?keyword={{ $s->nis }}"
+              class="btn btn-primary btn-sm px-3">
+              <i class="bi bi-arrow-right me-1"></i>
+              Pilih
+            </a>
+          </div>
+          @endforeach
+        </div>
+      </div>
+    </div>
+  </div>
+  @endisset
   @isset($siswa)
   <!-- Student Identity Card -->
   <div class="row mb-4">
@@ -103,7 +138,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <h5 class="fw-bold mb-0">
               <i class="bi bi-list-check me-2 text-primary"></i>
-              Daftar Tagihan
+              Daftar Tagihan Aktif
             </h5>
             <div class="d-flex gap-2">
               @php
@@ -132,9 +167,9 @@
                       <i class="bi bi-receipt text-primary"></i>
                     </div>
                   </div>
-                  <div>
-                    <h6 class="fw-bold mb-1">{{ $t->jenisTagihan->nama }}</h6>
-                    <small class="text-muted">Kode: {{ $t->id }}</small>
+                  <div class="d-flex align-items-center text-uppercase">
+                    <h6 class="fw-bold mb-0 me-1">{{ $t->jenisTagihan->nama }}</h6>
+                    <h6 class="fw-bold mb-0 me-2">{{ $t->periode }}</h6>
                   </div>
                 </div>
               </div>
@@ -169,7 +204,7 @@
                   <span class="fw-bold text-danger">Rp{{ number_format($sisa, 0, ',', '.') }}</span>
                   <button class="btn btn-success btn-sm mt-2 payment-btn"
                     data-tagihan-id="{{ $t->id }}"
-                    data-nama="{{ $t->jenisTagihan->nama }}"
+                    data-nama="{{ $t->jenisTagihan->nama }} {{ $t->periode }}"
                     data-sisa="{{ $sisa }}"
                     data-sisa-formatted="Rp{{ number_format($sisa, 0, ',', '.') }}">
                     <i class="bi bi-credit-card me-1"></i>
@@ -195,28 +230,7 @@
   </div>
   @endisset
 
-  @if(!isset($siswa) && request()->has('keyword'))
-  <!-- No Results -->
-  <div class="row">
-    <div class="col-12">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body text-center py-5">
-          <div class="mb-3">
-            <i class="bi bi-search display-1 text-muted"></i>
-          </div>
-          <h5 class="text-muted">Data Tidak Ditemukan</h5>
-          <p class="text-muted mb-3">
-            Siswa dengan NIS atau nama "<strong>{{ request('keyword') }}</strong>" tidak ditemukan
-          </p>
-          <a href="{{ route('pembayaran.cari') }}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left me-1"></i>
-            Cari Lagi
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-  @endif
+
 
 </div>
 
@@ -379,6 +393,14 @@
     border-bottom: none;
   }
 
+  .hover-row {
+    transition: background-color 0.15s ease;
+  }
+
+  .hover-row:hover {
+    background-color: #f8f9ff;
+  }
+
   /* Button styling */
   .btn {
     padding: 10px 24px;
@@ -421,7 +443,7 @@
     @if(session('swal_success'))
 
     Swal.fire({
-      title: "{{ session('swal_success.status') === 'lunas' ? 'Pembayaran Lunas! 🎉' : 'Pembayaran Berhasil!' }}",
+      title: "{{ session('swal_success.status') === 'lunas' ? 'Pembayaran Lunas! ' : 'Pembayaran Berhasil!' }}",
       icon: 'success',
       html: `
         <div class="text-start">
@@ -479,6 +501,17 @@
     });
 
     @endif
+
+    // Check for SweetAlert error
+    @if(session('swal_error'))
+
+    Swal.fire({
+      title: "{{ session('swal_error.title') }}",
+      text: "{{ session('swal_error.text') }}",
+      icon: "{{ session('swal_error.icon') }}"
+    });
+    @endif
+
 
     paymentButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -594,5 +627,4 @@
 
   });
 </script>
-
 @endsection

@@ -16,7 +16,7 @@
                 @csrf
                 <div class="row g-2">
                     <div class="col-md-6">
-                        <input type="text" name="nama" class="form-control" placeholder="Contoh: IPA / IPS / TKJ" required>
+                        <input type="text" name="nama" class="form-control" placeholder="Nama Jurusan" required>
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Tambah</button>

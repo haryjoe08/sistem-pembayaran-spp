@@ -3,34 +3,34 @@
 @section('content')
 
 <div class="container-fluid p-4">
-   <!-- SUCCESS MESSAGE -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+  <!-- SUCCESS MESSAGE -->
+  @if(session('success'))
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle"></i> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  @endif
 
-    <!-- ERROR MESSAGE -->
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+  <!-- ERROR MESSAGE -->
+  @if(session('error'))
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  @endif
 
-    <!-- Atau tampilkan semua errors dari validation -->
-    @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle"></i> <strong>Terjadi kesalahan:</strong>
-            <ul class="mb-0 mt-2">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+  <!-- Atau tampilkan semua errors dari validation -->
+  @if($errors->any())
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle"></i> <strong>Terjadi kesalahan:</strong>
+    <ul class="mb-0 mt-2">
+      @foreach($errors->all() as $error)
+      <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  @endif
   <!-- Header -->
   <div class="row mb-4">
     <div class="col-12">
@@ -110,7 +110,7 @@
     <div class="card-body p-3">
       <form action="{{ route('tagihan.index') }}" method="GET">
         <div class="row g-3 align-items-end">
-          
+
           <!-- Filter Status -->
           <div class="col-md-2">
             <label class="form-label small text-muted fw-bold">Status</label>
@@ -133,10 +133,10 @@
             <select class="form-select" name="tahun_ajaran_id">
               <option value="">Semua Tahun Ajaran</option>
               @foreach($tahunAjaran as $ta)
-                <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id') == $ta->id ? 'selected' : '' }}>
-                  {{ $ta->tahun}}
-                  @if($ta->status === 'aktif') (Aktif) @endif
-                </option>
+              <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id') == $ta->id ? 'selected' : '' }}>
+                {{ $ta->tahun}}
+                @if($ta->status === 'aktif') (Aktif) @endif
+              </option>
               @endforeach
             </select>
           </div>
@@ -147,9 +147,9 @@
             <select class="form-select" name="jenis_tagihan_id">
               <option value="">Semua Jenis</option>
               @foreach($jenisTagihan as $jt)
-                <option value="{{ $jt->id }}" {{ request('jenis_tagihan_id') == $jt->id ? 'selected' : '' }}>
-                  {{ $jt->nama}}
-                </option>
+              <option value="{{ $jt->id }}" {{ request('jenis_tagihan_id') == $jt->id ? 'selected' : '' }}>
+                {{ $jt->nama}}
+              </option>
               @endforeach
             </select>
           </div>
@@ -160,9 +160,9 @@
             <select class="form-select" name="kelas_id">
               <option value="">Semua Kelas</option>
               @foreach($kelas as $k)
-                <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
-                  {{ $k->kelas }}
-                </option>
+              <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
+                {{ $k->kelas }}
+              </option>
               @endforeach
             </select>
           </div>
@@ -170,11 +170,11 @@
           <!-- Search -->
           <div class="col-md-3">
             <label class="form-label small text-muted fw-bold">Cari Siswa</label>
-            <input type="text" 
-                   class="form-control" 
-                   name="search" 
-                   placeholder="NIS atau Nama..."
-                   value="{{ request('search') }}">
+            <input type="text"
+              class="form-control"
+              name="search"
+              placeholder="NIS atau Nama..."
+              value="{{ request('search') }}">
           </div>
 
           <!-- Buttons -->
@@ -200,25 +200,25 @@
       <i class="bi bi-funnel me-2"></i>
       <strong>Filter Aktif:</strong>
       @if(request('status') && request('status') !== 'belum lunas')
-        <span class="badge bg-primary ms-1">Status: {{ ucfirst(str_replace('_', ' ', request('status'))) }}</span>
+      <span class="badge bg-primary ms-1">Status: {{ ucfirst(str_replace('_', ' ', request('status'))) }}</span>
       @endif
       @if(request('tahun_ajaran_id'))
-        <span class="badge bg-primary ms-1">
-          Tahun: {{ \App\Models\TahunAjaran::find(request('tahun_ajaran_id'))->tahun ?? '-' }}
-        </span>
+      <span class="badge bg-primary ms-1">
+        Tahun: {{ \App\Models\TahunAjaran::find(request('tahun_ajaran_id'))->tahun ?? '-' }}
+      </span>
       @endif
-      @if(request('jenis_pembayaran_id'))
-        <span class="badge bg-primary ms-1">
-          Jenis Tagihan: {{ \App\Models\JenisPembayaran::find(request('jenis_pembayaran_id'))->nama ?? '-' }}
-        </span>
+      @if(request('jenis_tagihan_id'))
+      <span class="badge bg-primary ms-1">
+        Jenis Tagihan: {{ \App\Models\JenisPembayaran::find(request('jenis_tagihan_id'))->nama ?? '-' }}
+      </span>
       @endif
       @if(request('kelas_id'))
-        <span class="badge bg-primary ms-1">
-          Kelas: {{ \App\Models\Kelas::find(request('kelas_id'))->kelas ?? '-' }}
-        </span>
+      <span class="badge bg-primary ms-1">
+        Kelas: {{ \App\Models\Kelas::find(request('kelas_id'))->kelas ?? '-' }}
+      </span>
       @endif
       @if(request('search'))
-        <span class="badge bg-primary ms-1">Search: {{ request('search') }}</span>
+      <span class="badge bg-primary ms-1">Search: {{ request('search') }}</span>
       @endif
     </div>
     <a href="{{ route('tagihan.index') }}" class="btn btn-sm btn-outline-danger">
@@ -265,11 +265,9 @@
               </td>
               <td>
                 {{ $d->jenisTagihan->nama ?? '-' }}
-                @if($d->jenisTagihan)
-                  <br>
-                  <small class="text-muted">({{ ucfirst($d->jenisTagihan->tipe ?? 'bulanan') }})</small>
-                @endif
+                {{ $d->periode }}
               </td>
+
               <td>
                 <strong>Rp {{ number_format($d->total_tagihan, 0, ',', '.') }}</strong>
               </td>
@@ -278,7 +276,7 @@
               </td>
               <td>
                 @php
-                  $sisa = $d->total_tagihan - $d->sudah_dibayar;
+                $sisa = $d->total_tagihan - $d->sudah_dibayar;
                 @endphp
                 <strong class="{{ $sisa > 0 ? 'text-danger' : 'text-success' }}">
                   Rp {{ number_format($sisa, 0, ',', '.') }}
@@ -286,34 +284,34 @@
               </td>
               <td>
                 @php
-                  $jatuhTempo = \Carbon\Carbon::parse($d->jatuh_tempo);
-                  $isLewat = $jatuhTempo->isPast() && $d->status !== 'lunas';
+                $jatuhTempo = \Carbon\Carbon::parse($d->jatuh_tempo);
+                $isLewat = $jatuhTempo->isPast() && $d->status !== 'lunas';
                 @endphp
                 <small class="{{ $isLewat ? 'text-danger fw-bold' : '' }}">
                   {{ $jatuhTempo->translatedFormat('d M Y') }}
                   @if($isLewat)
-                    <br><span class="badge bg-danger">Lewat JT</span>
+                  <br><span class="badge bg-danger">Lewat JT</span>
                   @endif
                 </small>
               </td>
               <td>
                 @if($d->status === 'lunas')
-                  <span class="badge bg-success">Lunas</span>
+                <span class="badge bg-success">Lunas</span>
                 @else
-                  <span class="badge bg-danger">Belum Lunas</span>
+                <span class="badge bg-danger">Belum Lunas</span>
                 @endif
               </td>
               <td class="text-center">
                 <div class="btn-group btn-group-sm">
-                  <a href="{{ route('tagihan.edit', $d->id) }}" 
-                     class="btn btn-warning" 
-                     title="Edit">
+                  <a href="{{ route('tagihan.edit', $d->id) }}"
+                    class="btn btn-warning"
+                    title="Edit">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <form action="{{ route('tagihan.destroy', $d->id) }}" 
-                        method="POST" 
-                        class="d-inline"
-                        onsubmit="return confirm('Yakin hapus tagihan ini?')">
+                  <form action="{{ route('tagihan.destroy', $d->id) }}"
+                    method="POST"
+                    class="d-inline"
+                    onsubmit="return confirm('Yakin hapus tagihan ini?')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger" title="Hapus">
@@ -337,13 +335,13 @@
         <i class="bi bi-inbox display-1 text-muted"></i>
         <p class="text-muted mt-3">Tidak ada tagihan ditemukan</p>
         @if(request()->hasAny(['status', 'tahun_ajaran_id', 'kelas_id', 'search']))
-          <a href="{{ route('tagihan.index') }}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-clockwise me-1"></i> Reset Filter
-          </a>
+        <a href="{{ route('tagihan.index') }}" class="btn btn-outline-primary">
+          <i class="bi bi-arrow-clockwise me-1"></i> Reset Filter
+        </a>
         @else
-          <a href="{{ route('tagihan.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Buat Tagihan Pertama
-          </a>
+        <a href="{{ route('tagihan.create') }}" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i> Buat Tagihan Pertama
+        </a>
         @endif
       </div>
       @endif

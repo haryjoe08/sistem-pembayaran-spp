@@ -28,7 +28,7 @@ class MidtransService
         try {
             $orderId = PaymentOrder::generateOrderId();
             $siswa = $tagihan->siswa;
-            
+
             // Prepare transaction details
             $params = [
                 'transaction_details' => [
@@ -80,7 +80,6 @@ class MidtransService
                 'order_id' => $orderId,
                 'payment_order' => $paymentOrder,
             ];
-
         } catch (\Exception $e) {
             Log::error('Midtrans Create Snap Error: ' . $e->getMessage());
             return [
@@ -123,7 +122,7 @@ class MidtransService
 
             // Get payment order
             $paymentOrder = PaymentOrder::where('order_id', $orderId)->first();
-            
+
             if (!$paymentOrder) {
                 Log::error('Payment order not found: ' . $orderId);
                 return false;
@@ -147,7 +146,7 @@ class MidtransService
                 $this->processSuccessPayment($paymentOrder);
             } elseif ($transactionStatus == 'pending') {
                 $paymentOrder->status = 'pending';
-                
+
                 // Save payment code untuk VA/Store
                 if (isset($notification->bill_key)) {
                     $paymentOrder->payment_code = $notification->bill_key;
@@ -172,9 +171,8 @@ class MidtransService
             $paymentOrder->save();
 
             Log::info('Payment notification processed: ' . $orderId . ' - ' . $transactionStatus);
-            
-            return true;
 
+            return true;
         } catch (\Exception $e) {
             Log::error('Midtrans Handle Notification Error: ' . $e->getMessage());
             return false;
@@ -192,16 +190,16 @@ class MidtransService
 
         // Get tagihan
         $tagihan = $paymentOrder->tagihan;
-        
+
         // Update tagihan
         $tagihan->sudah_dibayar += $paymentOrder->amount;
-        
+
         // Auto set status lunas
         if ($tagihan->sudah_dibayar >= $tagihan->total_tagihan) {
             $tagihan->status = 'lunas';
             $tagihan->sudah_dibayar = $tagihan->total_tagihan; // Normalisasi
         }
-        
+
         $tagihan->save();
 
         // Create transaksi record
@@ -222,11 +220,21 @@ class MidtransService
      */
     private function mapPaymentMethod($midtransType)
     {
-        return match($midtransType) {
+        return match ($midtransType) {
+
+            // === QRIS & E-Wallet QR ===
             'gopay', 'shopeepay', 'qris' => 'qris',
-            'bank_transfer', 'echannel', 'bca_klikpay', 'bri_epay', 'cimb_clicks' => 'va',
-            'credit_card' => 'transfer',
-            default => 'transfer',
+
+            // === Virtual Account ===
+            'bank_transfer', 'echannel' => 'va',
+
+            // === Convenience Store ===
+            'cstore' => 'cstore',
+
+            // === Credit Card ===
+            'credit_card' => 'credit_card',
+
+            default => 'unkown',
         };
     }
 }

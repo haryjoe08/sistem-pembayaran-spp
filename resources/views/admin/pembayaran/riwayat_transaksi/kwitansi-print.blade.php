@@ -298,8 +298,8 @@
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxQJNLNivJGJpOmS6PMtai7LBygqKAEaE0uQ&s" alt="Logo MA NU Batang" class="school-logo">
             <div class="school-name">MA NU BATANG</div>
             <div class="school-address">
-                Jl. Contoh No. 123, Kota, Provinsi 12345<br>
-                Telp: (0271) 123456 | Email: info@man-example.sch.id
+                Alamat :JI. Jenderal Ahmad Yani no. 114Kauman Batang 51215 <br>
+                email: manubatang@yahoo.co.id Telp. (0285) 392663
             </div>
         </div>
 
@@ -391,12 +391,12 @@
                 <div class="signature-box">
                     <div class="signature-label">Penerima,</div>
                     <div class="signature-name">_________________</div>
-                    <div class="signature-title">Bendahara</div>
+                    <div class="signature-title">Wiroso</div>
                 </div>
                 <div class="signature-box">
                     <div class="signature-label">Mengetahui,</div>
                     <div class="signature-name">_________________</div>
-                    <div class="signature-title">Kepala Sekolah</div>
+                    <div class="signature-title">Sarwani Spd.I</div>
                 </div>
             </div>
         </div>

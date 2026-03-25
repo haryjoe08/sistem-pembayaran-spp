@@ -19,6 +19,7 @@
           <th style="width: 10px">No</th>
           <th>Jenis Tagihan</th>
           <th>Tipe</th>
+          <th>Deskripsi</th>
           <th>Status</th>
           <th style="width: 220px">Aksi</th>
         </tr>
@@ -30,7 +31,7 @@
 
           <td>{{ $d->nama }}</td>
           <td>{{ $d->tipe }}</td>
-
+          <td>{{ $d->deskripsi }}</td>
           {{-- STATUS --}}
           <td>
             @if($d->status === 'aktif')
@@ -93,6 +94,38 @@
     </div>
   </div>
 </div>
+<style>
+  #toast-container>div {
+    opacity: 1 !important;
+    background-image: none !important;
+  }
+
+  .toast-success {
+    background-color: #198754 !important;
+  }
+
+  .toast-error {
+    background-color: #dc3545 !important;
+  }
+
+  .toast-info {
+    background-color: #0dcaf0 !important;
+  }
+
+  .toast-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+  }
+
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  .btn-group-sm .btn {
+    padding: 4px 8px;
+  }
+</style>
 
 @if(session('success'))
 @push('scripts')

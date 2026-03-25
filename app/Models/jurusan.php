@@ -15,8 +15,8 @@ class Jurusan extends Model
         'status'
     ];
 
-    // Jika jurusan berelasi dengan kelas
-public function siswa()
+
+    public function siswa()
     {
         return $this->hasMany(Siswa::class, 'jurusan.id');
     }

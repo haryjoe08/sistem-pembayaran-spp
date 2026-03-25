@@ -18,8 +18,16 @@
                     <a href="{{ route('laporan.index') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-1"></i> Kembali
                     </a>
-                    <a href="{{ route('laporan.export.tunggakan', request()->all()) }}" class="btn btn-success">
+
+                    <a href="{{ route('laporan.export.tunggakan', request()->only(['keyword', 'kelas_id', 'jenis_tagihan_id'])) }}"
+                        class="btn btn-success">
                         <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+                    </a>
+
+                    <a href="{{ route('laporan.tunggakan.print', request()->only(['keyword', 'kelas_id', 'jenis_tagihan_id'])) }}"
+                        class="btn btn-primary"
+                        target="_blank">
+                        <i class="bi bi-printer me-1"></i> Print
                     </a>
                 </div>
             </div>
@@ -37,20 +45,24 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4 mb-3">
             <div class="card border-0 shadow-sm bg-warning text-white">
                 <div class="card-body text-center">
                     <i class="bi bi-file-earmark-text display-6 mb-2"></i>
-                    <h3 class="fw-bold mb-0">{{ number_format($totalTagihanBelumLunas) }}</h3>
-                    <p class="mb-0 small opacity-75">Tagihan Belum Lunas</p>
+                    <h3 class="fw-bold mb-0">{{ number_format($totalTagihan) }}</h3>
+                    <p class="mb-0 small opacity-75">Jumlah Tagihan</p>
                 </div>
             </div>
         </div>
+
         <div class="col-md-4 mb-3">
             <div class="card border-0 shadow-sm bg-dark text-white">
                 <div class="card-body text-center">
-                    <i class="bi bi-currency-dollar display-6 mb-2"></i>
-                    <h3 class="fw-bold mb-0">Rp {{ number_format($totalTunggakan, 0, ',', '.') }}</h3>
+                    <i class="bi bi-exclamation-circle display-6 mb-2"></i>
+                    <h3 class="fw-bold mb-0">
+                        Rp {{ number_format($totalTunggakan, 0, ',', '.') }}
+                    </h3>
                     <p class="mb-0 small opacity-75">Total Tunggakan</p>
                 </div>
             </div>
@@ -61,33 +73,49 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom">
             <h6 class="mb-0 fw-semibold">
-                <i class="bi bi-funnel me-2"></i>
-                Filter Laporan
+                <i class="bi bi-funnel me-2"></i> Filter Laporan
             </h6>
         </div>
         <div class="card-body">
-            <form action="{{ route('laporan.tunggakan') }}" method="GET">
+            <form method="GET" action="{{ route('laporan.tunggakan') }}">
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-search me-1"></i>
+                            Cari Siswa
+                        </label>
+                        <input type="text"
+                            class="form-control"
+                            name="keyword"
+                            placeholder="NIS atau Nama Siswa..."
+                            value="{{ request('keyword') }}">
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label">Kelas</label>
-                        <select class="form-select" name="kelas_id">
+                        <select name="kelas_id" class="form-select">
                             <option value="">Semua Kelas</option>
                             @foreach($kelasList as $k)
-                            <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>{{ $k->kelas }}</option>
+                            <option value="{{ $k->id }}" @selected(request('kelas_id')==$k->id)>
+                                {{ $k->kelas }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-6">
+
+                    <div class="col-md-4">
                         <label class="form-label">Jenis Tagihan</label>
-                        <select class="form-select" name="jenis_tagihan_id">
+                        <select name="jenis_tagihan_id" class="form-select">
                             <option value="">Semua Jenis</option>
                             @foreach($jenisPembayaranList as $jp)
-                            <option value="{{ $jp->id }}" {{ request('jenis_tagihan_id') == $jp->id ? 'selected' : '' }}>{{ $jp->nama }}</option>
+                            <option value="{{ $jp->id }}" @selected(request('jenis_tagihan_id')==$jp->id)>
+                                {{ $jp->nama }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
+
                     <div class="col-12">
-                        <button type="submit" class="btn btn-primary">
+                        <button class="btn btn-primary">
                             <i class="bi bi-search me-1"></i> Terapkan Filter
                         </button>
                         <a href="{{ route('laporan.tunggakan') }}" class="btn btn-outline-secondary">
@@ -107,106 +135,69 @@
                 Daftar Tunggakan Per Siswa ({{ $totalSiswaMenunggak }} siswa)
             </h6>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="px-4 py-3">No</th>
-                            <th class="py-3">NIS</th>
-                            <th class="py-3">Nama Siswa</th>
-                            <th class="py-3">Kelas</th>
-                            <th class="py-3 text-center">Jml Tagihan</th>
-                            <th class="py-3 text-end">Total Tunggakan</th>
-                            <th class="py-3 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($tunggakanPerSiswa as $index => $data)
-                        <tr>
-                            <td class="px-4 py-3">{{ $tunggakanPerSiswa->firstItem() + $index }}</td>
-                            <td class="py-3">
-                                <span class="badge bg-secondary">{{ $data['siswa']->nis }}</span>
-                            </td>
-                            <td class="py-3">
-                                <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($data['siswa']->nama) }}&size=32"
-                                        class="rounded-circle me-2"
-                                        width="32" height="32">
-                                    <span class="fw-semibold">{{ $data['siswa']->nama }}</span>
-                                </div>
-                            </td>
-                            <td class="py-3">{{ $data['siswa']->kelas->kelas ?? '-' }}</td>
-                            <td class="py-3 text-center">
-                                <span class="badge bg-warning">{{ $data['jumlah_tagihan'] }}</span>
-                            </td>
-                            <td class="py-3 text-end fw-bold text-danger">
-                                Rp {{ number_format($data['total_tunggakan'], 0, ',', '.') }}
-                            </td>
-                            <td class="py-3 text-center">
-                                <a href="{{ route('pembayaran.cari', ['keyword' => $data['siswa']->nis]) }}"
-                                    class="btn btn-sm btn-outline-primary"
-                                    target="_blank">
-                                    <i class="bi bi-eye"></i> Detail
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-5">
-                                <i class="bi bi-check-circle display-6 text-success"></i>
-                                <p class="text-success mb-0 mt-2">Tidak ada tunggakan! Semua siswa sudah lunas.</p>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                    @if($tunggakanPerSiswa->count() > 0)
-                    <tfoot class="bg-light">
-                        <tr>
-                            <th colspan="5" class="px-4 py-3 text-end">TOTAL TUNGGAKAN:</th>
-                            <th class="py-3 text-end text-danger">Rp {{ number_format($totalTunggakan, 0, ',', '.') }}</th>
-                            <th></th>
-                        </tr>
-                    </tfoot>
-                    @endif
-                </table>
-            </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>NIS</th>
+                        <th>Nama Siswa</th>
+                        <th>Kelas</th>
+                        <th class="text-center">Jml Tagihan</th>
+                        <th class="text-end">Total Tunggakan</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($tunggakanPerSiswa as $data)
+                    <tr>
+                        <td>{{ $tunggakanPerSiswa->firstItem() + $loop->index }}</td>
+                        <td>{{ $data['siswa']->nis }}</td>
+                        <td class="fw-semibold">{{ $data['siswa']->nama }}</td>
+                        <td>{{ $data['siswa']->kelas->kelas ?? '-' }}</td>
+                        <td class="text-center">{{ $data['jumlah_tagihan'] }}</td>
+                        <td class="text-end fw-bold text-danger">
+                            Rp {{ number_format($data['total_tunggakan'], 0, ',', '.') }}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ route('pembayaran.cari', ['keyword' => $data['siswa']->nis]) }}"
+                                class="btn btn-sm btn-outline-primary"
+                                target="_blank">
+                                <i class="bi bi-eye"></i> Detail
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-success">
+                            <i class="bi bi-check-circle fs-3"></i>
+                            <div>Tidak ada tunggakan</div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+
+                @if($tunggakanPerSiswa->count())
+                <tfoot class="table-light">
+                    <tr>
+                        <th colspan="5" class="text-end">TOTAL</th>
+                        <th class="text-end text-danger">
+                            Rp {{ number_format($totalTunggakan, 0, ',', '.') }}
+                        </th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+                @endif
+            </table>
         </div>
-        
-        {{-- Pagination --}}
+
         @if($tunggakanPerSiswa->hasPages())
-        <div class="card-footer bg-white border-top">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-muted small">
-                    Menampilkan {{ $tunggakanPerSiswa->firstItem() }} sampai {{ $tunggakanPerSiswa->lastItem() }} dari {{ $tunggakanPerSiswa->total() }} siswa
-                </div>
-                <div>
-                    {{ $tunggakanPerSiswa->links() }}
-                </div>
-            </div>
+        <div class="card-footer bg-white">
+            {{ $tunggakanPerSiswa->links() }}
         </div>
         @endif
     </div>
 
-    <!-- Alert jika ada tunggakan besar -->
-    @if($totalTunggakan > 10000000)
-    <div class="alert alert-danger mt-4">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <strong>Perhatian!</strong> Total tunggakan melebihi Rp 10.000.000. Segera lakukan tindakan penagihan.
-    </div>
-    @endif
-
 </div>
-
-<style>
-    @media print {
-        .btn, .card-header, nav, .alert {
-            display: none !important;
-        }
-        .card {
-            box-shadow: none !important;
-            border: 1px solid #ddd !important;
-        }
-    }
-</style>
 @endsection

@@ -25,7 +25,7 @@ class PaymentController extends Controller
     public function index($tagihanId)
     {
         $tagihan = Tagihan::with(['siswa', 'jenisTagihan'])->findOrFail($tagihanId);
-        
+
         // Check authorization (siswa hanya bisa bayar tagihan sendiri)
         if (Auth::user()->role == 'siswa') {
             if ($tagihan->siswa_nis != Auth::user()->siswa->nis) {
@@ -55,7 +55,7 @@ class PaymentController extends Controller
         DB::beginTransaction();
         try {
             $tagihan = Tagihan::findOrFail($tagihanId);
-            
+
             // Validate amount
             $sisaTagihan = $tagihan->total_tagihan - $tagihan->sudah_dibayar;
             $amount = $request->amount;
@@ -82,11 +82,10 @@ class PaymentController extends Controller
                 'snap_token' => $result['snap_token'],
                 'order_id' => $result['order_id'],
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Payment Create Error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -100,18 +99,48 @@ class PaymentController extends Controller
     public function finish(Request $request)
     {
         $orderId = $request->order_id;
+
         $paymentOrder = PaymentOrder::where('order_id', $orderId)->first();
 
         if (!$paymentOrder) {
             return redirect()->route('siswa.dashboard')
-                           ->with('error', 'Pembayaran tidak ditemukan!');
+                ->with('error', 'Pembayaran tidak ditemukan!');
         }
 
-        // Check status from Midtrans
+        // Fetch status from Midtrans
         $statusCheck = $this->midtransService->checkTransactionStatus($orderId);
 
-        return view('siswa.payment.finish', compact('paymentOrder', 'statusCheck'));
+        if ($statusCheck['success']) {
+            $status = $statusCheck['data'];
+
+            // Update dasar
+            $paymentOrder->transaction_id = $status->transaction_id ?? $paymentOrder->transaction_id;
+            $paymentOrder->payment_type   = $status->payment_type ?? $paymentOrder->payment_type;
+            $paymentOrder->status         = $status->transaction_status ?? $paymentOrder->status;
+            $paymentOrder->midtrans_response = (array) $status;
+
+            // === VA / PAYMENT CODE ===
+            if (!$paymentOrder->payment_code) {
+                if (isset($status->va_numbers[0]->va_number)) {
+                    $paymentOrder->payment_code = $status->va_numbers[0]->va_number;
+                } elseif (isset($status->permata_va_number)) {
+                    $paymentOrder->payment_code = $status->permata_va_number;
+                } elseif (isset($status->bill_key)) {
+                    $paymentOrder->payment_code = $status->bill_key;
+                }
+            }
+
+            // === PDF URL ===
+            if (!$paymentOrder->pdf_url && isset($status->pdf_url)) {
+                $paymentOrder->pdf_url = $status->pdf_url;
+            }
+
+            $paymentOrder->save();
+        }
+
+        return view('siswa.payment.finish', compact('paymentOrder'));
     }
+
 
     /**
      * Payment unfinish
@@ -119,7 +148,7 @@ class PaymentController extends Controller
     public function unfinish(Request $request)
     {
         $orderId = $request->order_id;
-        
+
         return view('siswa.payment.unfinish', compact('orderId'));
     }
 
@@ -129,7 +158,7 @@ class PaymentController extends Controller
     public function error(Request $request)
     {
         $orderId = $request->order_id;
-        
+
         return view('siswa.payment.error', compact('orderId'));
     }
 
@@ -140,18 +169,22 @@ class PaymentController extends Controller
     {
         try {
             $notification = $request->all();
-            
+
             Log::info('Midtrans Notification Received', $notification);
 
             // Process notification
             $this->midtransService->handleNotification((object) $notification);
 
             return response()->json(['message' => 'Notification handled'], 200);
-
         } catch (\Exception $e) {
             Log::error('Notification Error: ' . $e->getMessage());
             return response()->json(['message' => 'Error'], 500);
         }
+
+        Log::error('=== MIDTRANS WEBHOOK MASUK ===');
+        Log::error(json_encode($request->all(), JSON_PRETTY_PRINT));
+
+        return response()->json(['ok' => true]);
     }
 
     /**
@@ -181,11 +214,11 @@ class PaymentController extends Controller
     public function history()
     {
         $siswa = Auth::user()->siswa;
-        
+
         $payments = PaymentOrder::where('siswa_nis', $siswa->nis)
-                                ->with(['tagihan.jenisTagihan'])
-                                ->orderBy('created_at', 'desc')
-                                ->paginate(10);
+            ->with(['tagihan.jenisTagihan'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
         return view('siswa.payment.history', compact('payments'));
     }
@@ -196,8 +229,8 @@ class PaymentController extends Controller
     public function detail($orderId)
     {
         $paymentOrder = PaymentOrder::with(['tagihan.jenisTagihan', 'siswa'])
-                                    ->where('order_id', $orderId)
-                                    ->firstOrFail();
+            ->where('order_id', $orderId)
+            ->firstOrFail();
 
         // Authorization check
         if (Auth::user()->role == 'siswa') {

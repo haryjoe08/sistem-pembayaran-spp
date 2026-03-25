@@ -22,74 +22,83 @@
         </div>
         <div class="col-md-6">
           @if($tagihan->jatuh_tempo)
-            <div class="alert {{ $tagihan->isJatuhTempo() ? 'alert-danger' : ($tagihan->isMendekatJatuhTempo() ? 'alert-warning' : 'alert-success') }}">
-              <h6>
-                <i class="fas fa-calendar-alt"></i> Status Jatuh Tempo
-              </h6>
-              <p class="mb-1">
-                <strong>Tanggal:</strong> {{ $tagihan->jatuh_tempo->format('d/m/Y') }}
-              </p>
-              <p class="mb-0">
-                @if($tagihan->isJatuhTempo())
-                  <span class="badge bg-danger">
-                    <i class="fas fa-exclamation-triangle"></i> 
-                    Sudah Lewat {{ $tagihan->jatuh_tempo->diffForHumans() }}
-                  </span>
-                @elseif($tagihan->isMendekatJatuhTempo())
-                  <span class="badge bg-warning">
-                    <i class="fas fa-clock"></i> 
-                    {{ $tagihan->jatuh_tempo->diffForHumans() }}
-                  </span>
-                @else
-                  <span class="badge bg-success">
-                    <i class="fas fa-check-circle"></i> 
-                    {{ $tagihan->jatuh_tempo->diffForHumans() }}
-                  </span>
-                @endif
-              </p>
-            </div>
+          <div class="alert {{ $tagihan->isJatuhTempo() ? 'alert-danger' : ($tagihan->isMendekatJatuhTempo() ? 'alert-warning' : 'alert-success') }}">
+            <h6>
+              <i class="fas fa-calendar-alt"></i> Status Jatuh Tempo
+            </h6>
+            <p class="mb-1">
+              <strong>Tanggal:</strong> {{ $tagihan->jatuh_tempo->format('d/m/Y') }}
+            </p>
+            <p class="mb-0">
+              @if($tagihan->isJatuhTempo())
+              <span class="badge bg-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Sudah Lewat {{ $tagihan->jatuh_tempo->diffForHumans() }}
+              </span>
+              @elseif($tagihan->isMendekatJatuhTempo())
+              <span class="badge bg-warning">
+                <i class="fas fa-clock"></i>
+                {{ $tagihan->jatuh_tempo->diffForHumans() }}
+              </span>
+              @else
+              <span class="badge bg-success">
+                <i class="fas fa-check-circle"></i>
+                {{ $tagihan->jatuh_tempo->diffForHumans() }}
+              </span>
+              @endif
+            </p>
+          </div>
           @endif
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-6">
-          <!-- SISWA -->
+          <!-- SISWA (READONLY) -->
           <div class="mb-3">
-            <label for="siswa_nis" class="form-label">Siswa <span class="text-danger">*</span></label>
-            <select class="form-select @error('siswa_nis') is-invalid @enderror"
-              id="siswa_nis" name="siswa_nis" required>
-              <option value="">-- Pilih Siswa --</option>
+            <label class="form-label">Siswa</label>
+
+            <select class="form-select" disabled>
               @foreach($siswa as $s)
-                <option value="{{ $s->nis }}" 
-                  {{ (old('siswa_nis') ?? $tagihan->siswa_nis) == $s->nis ? 'selected' : '' }}
-                  data-kelas="{{ $s->kelas->kelas ?? 'Belum ada kelas' }}">
-                  {{ $s->nis }} - {{ $s->nama }} ({{ $s->kelas->kelas ?? 'Belum ada kelas' }})
-                </option>
+              <option value="{{ $s->nis }}"
+                {{ $tagihan->siswa_nis == $s->nis ? 'selected' : '' }}>
+                {{ $s->nis }} - {{ $s->nama }} ({{ $s->kelas->kelas ?? 'Belum ada kelas' }})
+              </option>
               @endforeach
             </select>
-            @error('siswa_nis')
-              <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+
+            <input type="hidden" name="siswa_nis" value="{{ $tagihan->siswa_nis }}">
           </div>
+
 
           <!-- JENIS TAGIHAN -->
           <div class="mb-3">
             <label for="jenis_tagihan_id" class="form-label">Jenis Tagihan <span class="text-danger">*</span></label>
-            <select class="form-select @error('jenis_tagihan_id') is-invalid @enderror"
-              id="jenis_tagihan_id" name="jenis_tagihan_id" required>
+            <select
+              class="form-select @error('jenis_tagihan_id') is-invalid @enderror"
+              id="jenis_tagihan_id"
+              name="jenis_tagihan_id"
+              required
+              {{ $isReadonly ? 'disabled' : '' }}>
+
               <option value="">-- Pilih Jenis Tagihan --</option>
               @foreach($jenisTagihan as $jp)
-                <option value="{{ $jp->id }}" 
-                  data-nominal="{{ $jp->nominal }}"
-                  {{ (old('jenis_tagihan_id') ?? $tagihan->jenis_tagihan_id) == $jp->id ? 'selected' : '' }}>
-                  {{ $jp->nama }} (Rp{{ number_format($jp->nominal, 0, ',', '.') }})
-                </option>
+              <option value="{{ $jp->id }}"
+                data-nominal="{{ $jp->nominal }}"
+                {{ (old('jenis_tagihan_id') ?? $tagihan->jenis_tagihan_id) == $jp->id ? 'selected' : '' }}>
+                {{ $jp->nama }} (Rp{{ number_format($jp->nominal, 0, ',', '.') }})
+              </option>
               @endforeach
             </select>
             @error('jenis_tagihan_id')
-              <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
+            @if($isReadonly)
+            <input
+              type="hidden"
+              name="jenis_tagihan_id"
+              value="{{ $tagihan->jenis_tagihan_id }}">
+            @endif
           </div>
 
           <!-- JATUH TEMPO (EDITABLE) -->
@@ -97,18 +106,18 @@
             <label for="jatuh_tempo" class="form-label">
               Jatuh Tempo <span class="text-danger">*</span>
             </label>
-            <input type="date" 
-              class="form-control @error('jatuh_tempo') is-invalid @enderror" 
-              id="jatuh_tempo" 
+            <input type="date"
+              class="form-control @error('jatuh_tempo') is-invalid @enderror"
+              id="jatuh_tempo"
               name="jatuh_tempo"
               value="{{ old('jatuh_tempo') ?? ($tagihan->jatuh_tempo ? $tagihan->jatuh_tempo->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')) }}"
               min="{{ now()->format('Y-m-d') }}"
               required>
             @error('jatuh_tempo')
-              <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
             <div class="form-text">
-              <i class="fas fa-info-circle"></i> 
+              <i class="fas fa-info-circle"></i>
               Pilih tanggal jatuh tempo pembayaran
             </div>
           </div>
@@ -118,11 +127,11 @@
             <label for="total_tagihan" class="form-label">Total Tagihan</label>
             <div class="input-group">
               <span class="input-group-text">Rp</span>
-              <input type="number" 
-                class="form-control" 
-                id="total_tagihan" 
-                name="total_tagihan" 
-                value="{{ old('total_tagihan') ?? $tagihan->total_tagihan }}" 
+              <input type="number"
+                class="form-control"
+                id="total_tagihan"
+                name="total_tagihan"
+                value="{{ old('total_tagihan') ?? $tagihan->total_tagihan }}"
                 readonly>
             </div>
             <div class="form-text">Otomatis mengikuti Jenis Tagihan yang dipilih</div>
@@ -135,11 +144,11 @@
             <label for="sudah_dibayar" class="form-label">Sudah Dibayar</label>
             <div class="input-group">
               <span class="input-group-text">Rp</span>
-              <input type="number" 
-                class="form-control" 
-                id="sudah_dibayar" 
-                name="sudah_dibayar" 
-                value="{{ old('sudah_dibayar') ?? $tagihan->sudah_dibayar }}" 
+              <input type="number"
+                class="form-control"
+                id="sudah_dibayar"
+                name="sudah_dibayar"
+                value="{{ old('sudah_dibayar') ?? $tagihan->sudah_dibayar }}"
                 readonly>
             </div>
             <div class="form-text">Data pembayaran dikelola di menu "Terima Pembayaran"</div>
@@ -184,7 +193,7 @@
               </button>
             </div>
             <div class="form-text">
-              <i class="fas fa-lightbulb"></i> 
+              <i class="fas fa-lightbulb"></i>
               Klik untuk mengatur jatuh tempo dari hari ini
             </div>
           </div>
@@ -193,7 +202,7 @@
 
       <!-- WARNING -->
       <div class="alert alert-info" role="alert">
-        <i class="fas fa-info-circle"></i> 
+        <i class="fas fa-info-circle"></i>
         <strong>Informasi:</strong> Form ini untuk mengubah Jenis Tagihan dan jatuh tempo tagihan. Untuk mencatat pembayaran dari siswa, gunakan menu "Terima Pembayaran".
       </div>
     </div>
@@ -211,10 +220,10 @@
 
 <script>
   // Auto update total tagihan berdasarkan Jenis Tagihan
-  document.getElementById('jenis_tagihan_id').addEventListener('change', function () {
+  document.getElementById('jenis_tagihan_id').addEventListener('change', function() {
     const selected = this.options[this.selectedIndex];
     const nominal = selected.getAttribute('data-nominal');
-    
+
     if (nominal) {
       document.getElementById('total_tagihan').value = nominal;
       calculateSisa();
@@ -226,7 +235,7 @@
     const total = parseFloat(document.getElementById('total_tagihan').value) || 0;
     const sudahBayar = parseFloat(document.getElementById('sudah_dibayar').value) || 0;
     const sisa = total - sudahBayar;
-    
+
     document.getElementById('sisa_tagihan').value = sisa.toLocaleString('id-ID');
   }
 
@@ -238,7 +247,7 @@
   document.getElementById('sudah_dibayar').addEventListener('input', function() {
     const total = parseFloat(document.getElementById('total_tagihan').value) || 0;
     const sudahBayar = parseFloat(this.value) || 0;
-    
+
     if (sudahBayar > total) {
       this.setCustomValidity('Jumlah yang sudah dibayar tidak boleh melebihi total tagihan');
       this.style.borderColor = '#dc3545';
@@ -252,13 +261,13 @@
   function setJatuhTempo(days) {
     const today = new Date();
     today.setDate(today.getDate() + days);
-    
+
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
-    
+
     document.getElementById('jatuh_tempo').value = `${year}-${month}-${day}`;
-    
+
     // Visual feedback
     const input = document.getElementById('jatuh_tempo');
     input.classList.add('border-success');
@@ -272,7 +281,7 @@
     const selectedDate = new Date(this.value);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (selectedDate < today) {
       if (!confirm('Tanggal jatuh tempo yang dipilih sudah lewat. Yakin ingin melanjutkan?')) {
         this.value = today.toISOString().split('T')[0];
@@ -287,12 +296,12 @@
     const jenisSelect = document.getElementById('jenis_tagihan_id');
     const jenisText = jenisSelect.options[jenisSelect.selectedIndex].text;
     const jatuhTempo = document.getElementById('jatuh_tempo').value;
-    
+
     const message = `Yakin ingin memperbarui tagihan?\n\n` +
-                   `Siswa: ${siswaText}\n` +
-                   `Jenis: ${jenisText}\n` +
-                   `Jatuh Tempo: ${new Date(jatuhTempo).toLocaleDateString('id-ID')}`;
-    
+      `Siswa: ${siswaText}\n` +
+      `Jenis: ${jenisText}\n` +
+      `Jatuh Tempo: ${new Date(jatuhTempo).toLocaleDateString('id-ID')}`;
+
     if (!confirm(message)) {
       e.preventDefault();
     }
